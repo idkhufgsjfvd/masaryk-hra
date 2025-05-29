@@ -10,32 +10,28 @@
       font-family: sans-serif;
       margin: 0;
       padding: 0;
-      display: flex;
-      justify-content: center;
     }
 
-    .layout {
+    .wrapper {
       display: flex;
+      justify-content: space-between;
       align-items: center;
-      justify-content: center;
-      max-width: 1400px;
-      width: 100%;
-      padding: 40px 20px;
+      padding: 20px;
     }
 
-    .side-img {
-      width: 200px;
+    .side-image {
+      width: 150px;
       height: auto;
-      margin: 0 20px;
     }
 
     .container {
+      max-width: 700px;
+      margin: auto;
       background-color: #003366;
       padding: 20px;
       border-radius: 10px;
       box-shadow: 0 0 20px #000;
       text-align: center;
-      max-width: 700px;
       flex-grow: 1;
     }
 
@@ -91,15 +87,30 @@
       background-color: gray;
       cursor: not-allowed;
     }
+
+    .side {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    @media (max-width: 900px) {
+      .wrapper {
+        flex-direction: column;
+      }
+      .side-image {
+        margin: 10px 0;
+      }
+    }
   </style>
 </head>
 <body>
 
-  <div class="layout">
-    <!-- Levý obrázek -->
-    <img src="tgm.jpg" alt="T. G. Masaryk" class="side-img">
+  <div class="wrapper">
+    <div class="side">
+      <img src="masaryk.jpg" alt="T. G. Masaryk" class="side-image">
+    </div>
 
-    <!-- Kvíz -->
     <div class="container">
       <h1>Chcete být milionářem – T. G. Masaryk</h1>
       <div id="hearts">❤️❤️❤️</div>
@@ -111,11 +122,11 @@
       <div class="result" id="result"></div>
     </div>
 
-    <!-- Pravý obrázek (podpis) -->
-    <img src="podpis.png" alt="Podpis TGM" class="side-img">
+    <div class="side">
+      <img src="podpis.png" alt="Podpis T. G. Masaryka" class="side-image">
+    </div>
   </div>
 
-  <!-- Zvuky -->
   <audio id="sound-correct" src="correct.mp3"></audio>
   <audio id="sound-wrong" src="wrong.mp3"></audio>
   <audio id="sound-win" src="win.mp3"></audio>
@@ -192,6 +203,7 @@
         }
       }
 
+      // skryj 50 na 50 po odpovědi
       if (!fiftyUsed) {
         document.getElementById("fifty-btn").style.display = "inline-block";
       } else {
@@ -200,8 +212,7 @@
     }
 
     function updateHearts() {
-      const heartsDiv = document.getElementById("hearts");
-      heartsDiv.textContent = "❤️".repeat(lives);
+      document.getElementById("hearts").textContent = "❤️".repeat(lives);
     }
 
     function useFiftyFifty() {
@@ -213,4 +224,23 @@
       const correct = q.correct;
 
       const wrongIndices = [];
-     
+      q.options.forEach((_, i) => {
+        if (i !== correct) wrongIndices.push(i);
+      });
+
+      const wrongToKeep = wrongIndices[Math.floor(Math.random() * wrongIndices.length)];
+      const indicesToHide = wrongIndices.filter(i => i !== wrongToKeep);
+
+      indicesToHide.forEach(i => {
+        const btn = document.getElementById(`option-${i}`);
+        if (btn) btn.style.display = "none";
+      });
+    }
+
+    showQuestion();
+    updateHearts();
+  </script>
+
+</body>
+</html>
+
