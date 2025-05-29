@@ -46,6 +46,16 @@
       font-size: 22px;
       font-weight: bold;
     }
+    .heart {
+      font-size: 30px;
+      margin: 0 5px;
+      transition: transform 0.3s, opacity 0.3s;
+      display: inline-block;
+    }
+    .heart.fade {
+      transform: scale(0);
+      opacity: 0;
+    }
   </style>
 </head>
 <body>
@@ -54,9 +64,7 @@
     <h1>Chcete být milionářem – T. G. Masaryk</h1>
 
     <!-- ❤️❤️❤️ -->
-    <div id="hearts" style="font-size: 30px; margin-bottom: 20px;">
-      ❤️❤️❤️
-    </div>
+    <div id="hearts" style="margin-bottom: 20px;"></div>
 
     <div id="quiz">
       <div class="question" id="question">Načítání otázky...</div>
@@ -130,7 +138,24 @@
 
     function updateHearts() {
       const heartsDiv = document.getElementById("hearts");
-      heartsDiv.textContent = "❤️".repeat(lives);
+      heartsDiv.innerHTML = "";
+      for (let i = 0; i < lives; i++) {
+        const heart = document.createElement("span");
+        heart.className = "heart";
+        heart.textContent = "❤️";
+        heartsDiv.appendChild(heart);
+      }
+    }
+
+    function removeHeart() {
+      const hearts = document.querySelectorAll(".heart");
+      if (hearts.length > 0) {
+        const lastHeart = hearts[hearts.length - 1];
+        lastHeart.classList.add("fade");
+        setTimeout(() => {
+          lastHeart.remove();
+        }, 300);
+      }
     }
 
     function playSound(id) {
@@ -178,7 +203,7 @@
       } else {
         playSound("sound-wrong");
         lives--;
-        updateHearts();
+        removeHeart();
 
         if (lives === 0) {
           document.getElementById("quiz").style.display = "none";
