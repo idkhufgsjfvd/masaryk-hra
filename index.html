@@ -1,3 +1,6 @@
+<div id="hearts" style="font-size: 30px; margin-bottom: 20px;">
+  ❤️❤️❤️
+</div>
 
 <!DOCTYPE html>
 <html lang="cs">
@@ -159,16 +162,27 @@ function checkAnswer(choice) {
 
     current++;
     showQuestion();
-  } else {
-    playSound("sound-wrong");
+ } else {
+  playSound("sound-wrong");
+  lives--;
+
+  updateHearts();
+
+  if (lives === 0) {
     document.getElementById("quiz").style.display = "none";
-    document.getElementById("result").textContent = "Špatná odpověď. Hra končí.";
+    document.getElementById("result").textContent = "Nemáš žádná srdíčka. Hra končí.";
   }
 }
 
     showQuestion();
   </script>
-  
+  let lives = 3;
+
+function updateHearts() {
+  const heartsDiv = document.getElementById("hearts");
+  heartsDiv.textContent = "❤️".repeat(lives);
+}
+
 <audio id="sound-correct" src="correct.mp3"></audio>
 <audio id="sound-wrong" src="wrong.mp3"></audio>
 <audio id="sound-win" src="win.mp3"></audio>
