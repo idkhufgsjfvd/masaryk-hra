@@ -96,7 +96,7 @@
     <button id="fiftyBtn" onclick="useFiftyFifty()">50 na 50</button>
   </div>
 
-  <!-- Pravý obrázek (nový) -->
+  <!-- Pravý obrázek -->
   <img src="masaryk2.png" alt="T. G. Masaryk (jiný)" class="side-image">
 
   <audio id="sound-correct" src="correct.mp3"></audio>
@@ -111,13 +111,13 @@
         correct: 0
       },
       {
-        question: "Kdy a kde se narodil T. G. Masaryk?",
-        options: ["14. září 1937 v Lánech", "7. března 1850 v Hodoníně", "7. března 1850 v Brně", "1. ledna 1900 v Praze"],
-        correct: 1
-      },
-      {
         question: "Kde se nachází letní prezidentské sídlo Masaryka?",
         options: ["Hodonín", "Třebíč", "Lány", "Vídeň"],
+        correct: 2
+      },
+      {
+        question: "Kdy se narodil T. G. Masaryk?",
+        options: ["14. září 1937", "1. ledna 1900", "7. března 1850", "28. října 1918"],
         correct: 2
       }
     ];
@@ -181,13 +181,16 @@
         }
       }
 
-      document.getElementById("fiftyBtn").disabled = true;
+      // Pokud už bylo použito 50 na 50, schováme tlačítko
+      if (fiftyUsed) {
+        const btn = document.getElementById("fiftyBtn");
+        if (btn) btn.remove();
+      }
     }
 
     function useFiftyFifty() {
       if (fiftyUsed) return;
       fiftyUsed = true;
-      document.getElementById("fiftyBtn").disabled = true;
 
       const q = questions[current];
       const options = Array.from(document.querySelectorAll("#options button"));
@@ -204,6 +207,10 @@
           btn.style.display = "none";
         }
       });
+
+      // Po použití 50 na 50 smažeme tlačítko
+      const btn = document.getElementById("fiftyBtn");
+      if (btn) btn.remove();
     }
 
     showQuestion();
