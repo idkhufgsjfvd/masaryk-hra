@@ -8,32 +8,26 @@
       background-color: #001f3f;
       color: white;
       font-family: sans-serif;
-      margin: 0;
+      text-align: center;
       padding: 40px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 40px;
     }
 
-    .side-image {
-      max-width: 250px;
-      height: auto;
-      border-radius: 10px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.5);
-    }
-
-    .main-content {
-      max-width: 700px;
+    .container {
+      max-width: 900px;
+      margin: auto;
       background-color: #003366;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 0 30px #000;
-      flex-shrink: 0;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 20px #000;
+      position: relative;
+    }
+
+    h1 {
+      margin-bottom: 30px;
     }
 
     .question {
-      font-size: 22px;
+      font-size: 20px;
       margin-bottom: 20px;
     }
 
@@ -41,12 +35,12 @@
       display: block;
       width: 100%;
       margin: 10px 0;
-      padding: 12px;
+      padding: 10px;
       font-size: 16px;
       background-color: #0055a5;
       color: white;
       border: none;
-      border-radius: 6px;
+      border-radius: 5px;
       cursor: pointer;
     }
 
@@ -66,38 +60,57 @@
     }
 
     #fiftyBtn {
-      margin-top: 20px;
-      padding: 12px 40px;
+      margin: 20px auto;
+      padding: 12px 24px;
       font-size: 18px;
-      background-color: #ffcc00;
+      background-color: orange;
+      color: black;
       border: none;
-      border-radius: 6px;
+      border-radius: 8px;
       cursor: pointer;
     }
 
-    #fiftyBtn:hover {
-      background-color: #ffdd33;
+    .side-image {
+      position: absolute;
+      top: 40px;
+      width: 100px;
+      height: auto;
+    }
+
+    .left-img {
+      left: -120px;
+    }
+
+    .right-img {
+      right: -120px;
+    }
+
+    @media (max-width: 768px) {
+      .side-image {
+        display: none;
+      }
     }
   </style>
 </head>
 <body>
 
-  <!-- Levý obrázek -->
-  <img src="masaryk.png" alt="T. G. Masaryk" class="side-image">
+  <div class="container">
+    <img src="masaryk.png" alt="T. G. Masaryk" class="side-image left-img">
+    <img src="masaryk2.png" alt="Podpis Masaryka" class="side-image right-img">
 
-  <div class="main-content">
     <h1>Chcete být milionářem – T. G. Masaryk</h1>
+
     <div id="hearts">❤️❤️❤️</div>
+
+    <button id="fiftyBtn" onclick="useFiftyFifty()">Použít 50 na 50</button>
+
     <div id="quiz">
       <div class="question" id="question">Načítání otázky...</div>
       <div class="options" id="options"></div>
     </div>
-    <div class="result" id="result"></div>
-    <button id="fiftyBtn" onclick="useFiftyFifty()">50 na 50</button>
-  </div>
 
-  <!-- Pravý obrázek -->
-  <img src="masaryk2.png" alt="T. G. Masaryk (jiný)" class="side-image">
+    <div class="result" id="result"></div>
+  </div>
 
   <audio id="sound-correct" src="correct.mp3"></audio>
   <audio id="sound-wrong" src="wrong.mp3"></audio>
@@ -111,46 +124,58 @@
         correct: 0
       },
       {
+        question: "Kdy a kde se narodil T. G. Masaryk?",
+        options: ["14. září 1937 v Lánech", "7. března 1850 v Hodoníně", "7. března 1850 v Brně", "1. ledna 1900 v Praze"],
+        correct: 1
+      },
+      {
+        question: "Kdy a kde zemřel T. G. Masaryk?",
+        options: ["14. září 1937 v Lánech", "28. října 1918 v Hodoníně", "7. března 1937 v Praze", "14. září 1937 v Brně"],
+        correct: 0
+      },
+      {
+        question: "Kolik měl Masaryk dětí?",
+        options: ["3", "4", "5", "6"],
+        correct: 2
+      },
+      {
+        question: "Které z těchto jmen nepatří mezi děti Masaryka?",
+        options: ["Alice", "Herbert", "Jan", "Karel"],
+        correct: 3
+      },
+      {
+        question: "Jaké zaměstnání T. G. Masaryk během života vykonával?",
+        options: ["pouze politik", "kovář, učitel, profesor, státník", "voják a generál", "lékař a chemik"],
+        correct: 1
+      },
+      {
         question: "Kde se nachází letní prezidentské sídlo Masaryka?",
         options: ["Hodonín", "Třebíč", "Lány", "Vídeň"],
         correct: 2
       },
       {
-        question: "Kdy se narodil T. G. Masaryk?",
-        options: ["14. září 1937", "1. ledna 1900", "7. března 1850", "28. října 1918"],
+        question: "Kdo přestavěl Pražský hrad za Masaryka?",
+        options: ["Karel IV.", "Jože Plečnik", "Jan Kaplický", "František Palacký"],
+        correct: 1
+      },
+      {
+        question: "Za co bojoval Masaryk během Hilsneriády?",
+        options: ["za monarchii", "proti antisemitismu", "za absolutismus", "proti industrializaci"],
+        correct: 1
+      },
+      {
+        question: "Který stát Masaryk pomáhal založit jako prezident?",
+        options: ["Rakousko", "Německo", "Československo", "Slovenský štát"],
         correct: 2
       }
     ];
 
     let current = 0;
     let lives = 3;
-    let fiftyUsed = false;
-
-    function showQuestion() {
-      if (current < questions.length) {
-        const q = questions[current];
-        document.getElementById("question").textContent = q.question;
-        const optionsDiv = document.getElementById("options");
-        optionsDiv.innerHTML = "";
-
-        q.options.forEach((option, i) => {
-          const button = document.createElement("button");
-          button.textContent = option;
-          button.onclick = () => checkAnswer(i);
-          button.dataset.index = i;
-          optionsDiv.appendChild(button);
-        });
-
-        document.getElementById("result").textContent = "";
-      } else {
-        document.getElementById("quiz").style.display = "none";
-        document.getElementById("result").textContent = "Gratulujeme! Zvládl jsi všechny otázky o T. G. Masarykovi!";
-      }
-    }
+    let usedFifty = false;
 
     function updateHearts() {
-      const heartsDiv = document.getElementById("hearts");
-      heartsDiv.textContent = "❤️".repeat(lives);
+      document.getElementById("hearts").textContent = "❤️".repeat(lives);
     }
 
     function playSound(id) {
@@ -161,9 +186,29 @@
       }
     }
 
+    function showQuestion() {
+      if (current >= questions.length) {
+        document.getElementById("quiz").style.display = "none";
+        document.getElementById("result").textContent = "Gratulujeme! Zvládl jsi všechny otázky o T. G. Masarykovi!";
+        return;
+      }
+
+      const q = questions[current];
+      const optionsDiv = document.getElementById("options");
+      document.getElementById("question").textContent = q.question;
+      optionsDiv.innerHTML = "";
+
+      q.options.forEach((option, i) => {
+        const button = document.createElement("button");
+        button.textContent = option;
+        button.onclick = () => checkAnswer(i);
+        button.dataset.index = i;
+        optionsDiv.appendChild(button);
+      });
+    }
+
     function checkAnswer(choice) {
       const q = questions[current];
-
       if (choice === q.correct) {
         playSound("sound-correct");
         current++;
@@ -180,40 +225,33 @@
           showQuestion();
         }
       }
-
-      // Pokud už bylo použito 50 na 50, schováme tlačítko
-      if (fiftyUsed) {
-        const btn = document.getElementById("fiftyBtn");
-        if (btn) btn.remove();
-      }
     }
 
     function useFiftyFifty() {
-      if (fiftyUsed) return;
-      fiftyUsed = true;
+      if (usedFifty) return;
+      usedFifty = true;
+      document.getElementById("fiftyBtn").style.display = "none";
 
       const q = questions[current];
-      const options = Array.from(document.querySelectorAll("#options button"));
-      const correctIndex = q.correct;
+      const options = [...q.options.keys()];
+      const correct = q.correct;
 
-      const wrongIndexes = options
-        .map((btn, i) => i)
-        .filter(i => i !== correctIndex);
+      const wrong = options.filter(i => i !== correct);
+      const keptWrong = wrong[Math.floor(Math.random() * wrong.length)];
 
-      const randomWrong = wrongIndexes[Math.floor(Math.random() * wrongIndexes.length)];
+      const keep = [correct, keptWrong];
 
-      options.forEach((btn, i) => {
-        if (i !== correctIndex && i !== randomWrong) {
+      const buttons = document.querySelectorAll("#options button");
+      buttons.forEach(btn => {
+        if (!keep.includes(Number(btn.dataset.index))) {
           btn.style.display = "none";
         }
       });
-
-      // Po použití 50 na 50 smažeme tlačítko
-      const btn = document.getElementById("fiftyBtn");
-      if (btn) btn.remove();
     }
 
+    updateHearts();
     showQuestion();
   </script>
+
 </body>
 </html>
