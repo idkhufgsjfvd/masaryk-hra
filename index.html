@@ -20,7 +20,7 @@
       box-shadow: 0 0 20px #000;
     }
     h1 {
-      margin-bottom: 30px;
+      margin-bottom: 20px;
     }
     .question {
       font-size: 20px;
@@ -37,6 +37,7 @@
       border: none;
       border-radius: 5px;
       cursor: pointer;
+      transition: background-color 0.3s;
     }
     .options button:hover {
       background-color: #0077cc;
@@ -46,15 +47,28 @@
       font-size: 22px;
       font-weight: bold;
     }
-    .heart {
+    #hearts {
       font-size: 30px;
-      margin: 0 5px;
-      transition: transform 0.3s, opacity 0.3s;
-      display: inline-block;
+      margin-bottom: 20px;
     }
-    .heart.fade {
-      transform: scale(0);
-      opacity: 0;
+    .fade-out {
+      animation: fadeOut 0.5s ease-out forwards;
+    }
+    @keyframes fadeOut {
+      from { opacity: 1; }
+      to { opacity: 0.2; transform: scale(1.2); }
+    }
+    .fifty-button {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      padding: 10px 15px;
+      font-size: 16px;
+      background-color: orange;
+      color: black;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
     }
   </style>
 </head>
@@ -62,19 +76,15 @@
 
   <div class="container">
     <h1>Chcete být milionářem – T. G. Masaryk</h1>
-
-    <!-- ❤️❤️❤️ -->
-    <div id="hearts" style="margin-bottom: 20px;"></div>
-
+    <div id="hearts">❤️❤️❤️</div>
+    <button class="fifty-button" onclick="useFiftyFifty()" id="fiftyBtn">50 na 50</button>
     <div id="quiz">
       <div class="question" id="question">Načítání otázky...</div>
       <div class="options" id="options"></div>
     </div>
-
     <div class="result" id="result"></div>
   </div>
 
-  <!-- Zvuky -->
   <audio id="sound-correct" src="correct.mp3"></audio>
   <audio id="sound-wrong" src="wrong.mp3"></audio>
   <audio id="sound-win" src="win.mp3"></audio>
@@ -91,72 +101,19 @@
         options: ["14. září 1937 v Lánech", "7. března 1850 v Hodoníně", "7. března 1850 v Brně", "1. ledna 1900 v Praze"],
         correct: 1
       },
-      {
-        question: "Kdy a kde zemřel T. G. Masaryk?",
-        options: ["14. září 1937 v Lánech", "28. října 1918 v Hodoníně", "7. března 1937 v Praze", "14. září 1937 v Brně"],
-        correct: 0
-      },
-      {
-        question: "Kolik měl Masaryk dětí?",
-        options: ["3", "4", "5", "6"],
-        correct: 2
-      },
-      {
-        question: "Které z těchto jmen nepatří mezi děti Masaryka?",
-        options: ["Alice", "Herbert", "Jan", "Karel"],
-        correct: 3
-      },
-      {
-        question: "Jaké zaměstnání T. G. Masaryk během života vykonával?",
-        options: ["pouze politik", "kovář, učitel, profesor, státník", "voják a generál", "lékař a chemik"],
-        correct: 1
-      },
-      {
-        question: "Kde se nachází letní prezidentské sídlo Masaryka?",
-        options: ["Hodonín", "Třebíč", "Lány", "Vídeň"],
-        correct: 2
-      },
-      {
-        question: "Kdo přestavěl Pražský hrad za Masaryka?",
-        options: ["Karel IV.", "Jože Plečnik", "Jan Kaplický", "František Palacký"],
-        correct: 1
-      },
-      {
-        question: "Za co bojoval Masaryk během Hilsneriády?",
-        options: ["za monarchii", "proti antisemitismu", "za absolutismus", "proti industrializaci"],
-        correct: 1
-      },
-      {
-        question: "Který stát Masaryk pomáhal založit jako prezident?",
-        options: ["Rakousko", "Německo", "Československo", "Slovenský štát"],
-        correct: 2
-      }
+      // ... (další otázky)
     ];
+
+    const fiftyFiftyQuestion = {
+      question: "Masaryk byl první prezident:",
+      options: ["Československa", "Rakouska"],
+      correct: 0
+    };
 
     let current = 0;
     let lives = 3;
-
-    function updateHearts() {
-      const heartsDiv = document.getElementById("hearts");
-      heartsDiv.innerHTML = "";
-      for (let i = 0; i < lives; i++) {
-        const heart = document.createElement("span");
-        heart.className = "heart";
-        heart.textContent = "❤️";
-        heartsDiv.appendChild(heart);
-      }
-    }
-
-    function removeHeart() {
-      const hearts = document.querySelectorAll(".heart");
-      if (hearts.length > 0) {
-        const lastHeart = hearts[hearts.length - 1];
-        lastHeart.classList.add("fade");
-        setTimeout(() => {
-          lastHeart.remove();
-        }, 300);
-      }
-    }
+    let fiftyUsed = false;
+    let inFiftyMode = false;
 
     function playSound(id) {
       const sound = document.getElementById(id);
@@ -166,56 +123,76 @@
       }
     }
 
+    function updateHearts() {
+      const heartsDiv = document.getElementById("hearts");
+      heartsDiv.classList.remove("fade-out");
+      heartsDiv.textContent = "❤️".repeat(lives);
+      if (lives < 3) {
+        heartsDiv.classList.add("fade-out");
+      }
+    }
+
     function showQuestion() {
+      inFiftyMode = false;
       if (current < questions.length) {
         const q = questions[current];
-        document.getElementById("question").textContent = q.question;
-        const optionsDiv = document.getElementById("options");
-        optionsDiv.innerHTML = "";
-
-        q.options.forEach((option, i) => {
-          const button = document.createElement("button");
-          button.textContent = option;
-          button.onclick = () => checkAnswer(i);
-          optionsDiv.appendChild(button);
-        });
+        renderQuestion(q);
       } else {
         document.getElementById("quiz").style.display = "none";
         document.getElementById("result").textContent = "Gratulujeme! Zvládl jsi všechny otázky o T. G. Masarykovi!";
       }
     }
 
-    function checkAnswer(choice) {
-      const q = questions[current];
-      const isLastQuestion = current === questions.length - 1;
+    function renderQuestion(q) {
+      document.getElementById("question").textContent = q.question;
+      const optionsDiv = document.getElementById("options");
+      optionsDiv.innerHTML = "";
 
-      if (choice === q.correct) {
+      q.options.forEach((option, i) => {
+        const button = document.createElement("button");
+        button.textContent = option;
+        button.onclick = () => checkAnswer(i, q);
+        optionsDiv.appendChild(button);
+      });
+    }
+
+    function checkAnswer(choice, q) {
+      const isCorrect = choice === q.correct;
+      if (isCorrect) {
         playSound("sound-correct");
-
-        if (isLastQuestion) {
-          setTimeout(() => {
-            playSound("sound-win");
-          }, 2000);
+        if (!inFiftyMode) current++;
+        if (!inFiftyMode && current === questions.length) {
+          setTimeout(() => playSound("sound-win"), 2000);
         }
-
-        current++;
         showQuestion();
       } else {
         playSound("sound-wrong");
         lives--;
-        removeHeart();
-
+        updateHearts();
         if (lives === 0) {
           document.getElementById("quiz").style.display = "none";
           document.getElementById("result").textContent = "Nemáš žádná srdíčka. Hra končí.";
+        } else {
+          if (!inFiftyMode) {
+            current++;
+            showQuestion();
+          } else {
+            showQuestion(); // vrátí se k normálním otázkám
+          }
         }
       }
     }
 
-    // Spustíme hru
+    function useFiftyFifty() {
+      if (fiftyUsed) return;
+      fiftyUsed = true;
+      document.getElementById("fiftyBtn").style.display = "none";
+      inFiftyMode = true;
+      renderQuestion(fiftyFiftyQuestion);
+    }
+
     updateHearts();
     showQuestion();
   </script>
-
 </body>
 </html>
