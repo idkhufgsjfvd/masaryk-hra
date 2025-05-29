@@ -37,7 +37,6 @@
       border: none;
       border-radius: 5px;
       cursor: pointer;
-      transition: background-color 0.3s;
     }
     .options button:hover {
       background-color: #0077cc;
@@ -50,25 +49,21 @@
     #hearts {
       font-size: 30px;
       margin-bottom: 20px;
+      transition: all 0.3s ease;
     }
-    .fade-out {
-      animation: fadeOut 0.5s ease-out forwards;
-    }
-    @keyframes fadeOut {
-      from { opacity: 1; }
-      to { opacity: 0.2; transform: scale(1.2); }
-    }
-    .fifty-button {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      padding: 10px 15px;
-      font-size: 16px;
+    #fiftyBtn {
+      padding: 12px 20px;
+      font-size: 18px;
       background-color: orange;
       color: black;
       border: none;
-      border-radius: 5px;
+      border-radius: 10px;
       cursor: pointer;
+      margin: 15px 0;
+    }
+    #fiftyBtn:disabled {
+      background-color: gray;
+      cursor: default;
     }
   </style>
 </head>
@@ -77,7 +72,8 @@
   <div class="container">
     <h1>Chcete být milionářem – T. G. Masaryk</h1>
     <div id="hearts">❤️❤️❤️</div>
-    <button class="fifty-button" onclick="useFiftyFifty()" id="fiftyBtn">50 na 50</button>
+    <button id="fiftyBtn" onclick="useFifty()">🟠 50 na 50</button>
+
     <div id="quiz">
       <div class="question" id="question">Načítání otázky...</div>
       <div class="options" id="options"></div>
@@ -101,19 +97,23 @@
         options: ["14. září 1937 v Lánech", "7. března 1850 v Hodoníně", "7. března 1850 v Brně", "1. ledna 1900 v Praze"],
         correct: 1
       },
-      // ... (další otázky)
+      {
+        question: "Kde se nachází letní prezidentské sídlo Masaryka?",
+        options: ["Hodonín", "Třebíč", "Lány", "Vídeň"],
+        correct: 2
+      }
     ];
 
-    const fiftyFiftyQuestion = {
-      question: "Masaryk byl první prezident:",
-      options: ["Československa", "Rakouska"],
+    const fiftyQuestion = {
+      question: "Ve kterém roce byl Masaryk zvolen prezidentem podruhé?",
+      options: ["1927", "1934"],
       correct: 0
     };
 
     let current = 0;
     let lives = 3;
-    let fiftyUsed = false;
-    let inFiftyMode = false;
+    let usedFifty = false;
+    let isFiftyQuestion = false;
 
     function playSound(id) {
       const sound = document.getElementById(id);
@@ -125,46 +125,49 @@
 
     function updateHearts() {
       const heartsDiv = document.getElementById("hearts");
-      heartsDiv.classList.remove("fade-out");
       heartsDiv.textContent = "❤️".repeat(lives);
-      if (lives < 3) {
-        heartsDiv.classList.add("fade-out");
-      }
     }
 
     function showQuestion() {
-      inFiftyMode = false;
-      if (current < questions.length) {
+      const quiz = document.getElementById("quiz");
+      const questionEl = document.getElementById("question");
+      const optionsEl = document.getElementById("options");
+
+      if (isFiftyQuestion) {
+        questionEl.textContent = fiftyQuestion.question;
+        optionsEl.innerHTML = "";
+
+        fiftyQuestion.options.forEach((opt, i) => {
+          const btn = document.createElement("button");
+          btn.textContent = opt;
+          btn.onclick = () => checkFiftyAnswer(i);
+          optionsEl.appendChild(btn);
+        });
+
+      } else if (current < questions.length) {
         const q = questions[current];
-        renderQuestion(q);
+        questionEl.textContent = q.question;
+        optionsEl.innerHTML = "";
+
+        q.options.forEach((opt, i) => {
+          const btn = document.createElement("button");
+          btn.textContent = opt;
+          btn.onclick = () => checkAnswer(i);
+          optionsEl.appendChild(btn);
+        });
+
       } else {
-        document.getElementById("quiz").style.display = "none";
+        quiz.style.display = "none";
         document.getElementById("result").textContent = "Gratulujeme! Zvládl jsi všechny otázky o T. G. Masarykovi!";
       }
     }
 
-    function renderQuestion(q) {
-      document.getElementById("question").textContent = q.question;
-      const optionsDiv = document.getElementById("options");
-      optionsDiv.innerHTML = "";
-
-      q.options.forEach((option, i) => {
-        const button = document.createElement("button");
-        button.textContent = option;
-        button.onclick = () => checkAnswer(i, q);
-        optionsDiv.appendChild(button);
-      });
-    }
-
-    function checkAnswer(choice, q) {
-      const isCorrect = choice === q.correct;
-      if (isCorrect) {
+    function checkAnswer(choice) {
+      const q = questions[current];
+      if (choice === q.correct) {
         playSound("sound-correct");
-        if (!inFiftyMode) current++;
-        if (!inFiftyMode && current === questions.length) {
-          setTimeout(() => playSound("sound-win"), 2000);
-        }
-        showQuestion();
+        current++;
+        setTimeout(showQuestion, 500);
       } else {
         playSound("sound-wrong");
         lives--;
@@ -173,22 +176,34 @@
           document.getElementById("quiz").style.display = "none";
           document.getElementById("result").textContent = "Nemáš žádná srdíčka. Hra končí.";
         } else {
-          if (!inFiftyMode) {
-            current++;
-            showQuestion();
-          } else {
-            showQuestion(); // vrátí se k normálním otázkám
-          }
+          setTimeout(showQuestion, 500);
         }
       }
     }
 
-    function useFiftyFifty() {
-      if (fiftyUsed) return;
-      fiftyUsed = true;
-      document.getElementById("fiftyBtn").style.display = "none";
-      inFiftyMode = true;
-      renderQuestion(fiftyFiftyQuestion);
+    function useFifty() {
+      if (usedFifty || isFiftyQuestion) return;
+      usedFifty = true;
+      isFiftyQuestion = true;
+      document.getElementById("fiftyBtn").disabled = true;
+      showQuestion();
+    }
+
+    function checkFiftyAnswer(choice) {
+      if (choice === fiftyQuestion.correct) {
+        playSound("sound-correct");
+      } else {
+        playSound("sound-wrong");
+        lives--;
+        updateHearts();
+        if (lives === 0) {
+          document.getElementById("quiz").style.display = "none";
+          document.getElementById("result").textContent = "Nemáš žádná srdíčka. Hra končí.";
+          return;
+        }
+      }
+      isFiftyQuestion = false;
+      setTimeout(showQuestion, 500);
     }
 
     updateHearts();
