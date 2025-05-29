@@ -134,23 +134,41 @@
         document.getElementById("result").textContent = "Gratulujeme! Zvládl jsi všechny otázky o T. G. Masarykovi!";
       }
     }
+function playSound(id) {
+  const sound = document.getElementById(id);
+  if (sound) {
+    sound.currentTime = 0;
+    sound.play();
+  }
+}
 
-    function checkAnswer(choice) {
-      const q = questions[current];
-      if (choice === q.correct) {
-        current++;
-        showQuestion();
-      } else {
-        document.getElementById("quiz").style.display = "none";
-        document.getElementById("result").textContent = "Špatná odpověď. Hra končí.";
-      }
+function checkAnswer(choice) {
+  const q = questions[current];
+  const isLastQuestion = current === questions.length - 1;
+
+  if (choice === q.correct) {
+    playSound("sound-correct");
+
+    if (isLastQuestion) {
+      setTimeout(() => {
+        playSound("sound-win");
+      }, 2000);
     }
+
+    current++;
+    showQuestion();
+  } else {
+    playSound("sound-wrong");
+    document.getElementById("quiz").style.display = "none";
+    document.getElementById("result").textContent = "Špatná odpověď. Hra končí.";
+  }
+}
 
     showQuestion();
   </script>
+  
 <audio id="sound-correct" src="sounds/correct.mp3"></audio>
 <audio id="sound-wrong" src="sounds/wrong.mp3"></audio>
 <audio id="sound-win" src="sounds/win.mp3"></audio>
-
 </body>
 </html>
