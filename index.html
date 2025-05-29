@@ -41,6 +41,16 @@
     .options button:hover {
       background-color: #0077cc;
     }
+    #fiftyBtn {
+      font-size: 20px;
+      padding: 10px 20px;
+      background-color: orange;
+      color: black;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin: 20px;
+    }
     .result {
       margin-top: 20px;
       font-size: 22px;
@@ -49,165 +59,136 @@
     #hearts {
       font-size: 30px;
       margin-bottom: 20px;
-      transition: all 0.3s ease;
-    }
-    #fiftyBtn {
-      padding: 12px 20px;
-      font-size: 18px;
-      background-color: orange;
-      color: black;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      margin: 15px 0;
-    }
-    #fiftyBtn:disabled {
-      background-color: gray;
-      cursor: default;
     }
   </style>
 </head>
 <body>
 
-  <div class="container">
-    <h1>Chcete být milionářem – T. G. Masaryk</h1>
-    <div id="hearts">❤️❤️❤️</div>
-    <button id="fiftyBtn" onclick="useFifty()">🟠 50 na 50</button>
-
-    <div id="quiz">
-      <div class="question" id="question">Načítání otázky...</div>
-      <div class="options" id="options"></div>
-    </div>
-    <div class="result" id="result"></div>
+<div class="container">
+  <h1>Chcete být milionářem – T. G. Masaryk</h1>
+  <div id="hearts">❤️❤️❤️</div>
+  <button id="fiftyBtn" onclick="useFiftyFifty()">50 na 50</button>
+  <div id="quiz">
+    <div class="question" id="question">Načítání otázky...</div>
+    <div class="options" id="options"></div>
   </div>
+  <div class="result" id="result"></div>
+</div>
 
-  <audio id="sound-correct" src="correct.mp3"></audio>
-  <audio id="sound-wrong" src="wrong.mp3"></audio>
-  <audio id="sound-win" src="win.mp3"></audio>
+<audio id="sound-correct" src="correct.mp3"></audio>
+<audio id="sound-wrong" src="wrong.mp3"></audio>
+<audio id="sound-win" src="win.mp3"></audio>
 
-  <script>
-    const questions = [
-      {
-        question: "Jaké bylo rodné jméno T. G. Masaryka?",
-        options: ["Tomáš Jan Masaryk", "Tomáš Josef Masaryk", "Tomáš Karel Masaryk", "Tomáš Ludvík Masaryk"],
-        correct: 0
-      },
-      {
-        question: "Kdy a kde se narodil T. G. Masaryk?",
-        options: ["14. září 1937 v Lánech", "7. března 1850 v Hodoníně", "7. března 1850 v Brně", "1. ledna 1900 v Praze"],
-        correct: 1
-      },
-      {
-        question: "Kde se nachází letní prezidentské sídlo Masaryka?",
-        options: ["Hodonín", "Třebíč", "Lány", "Vídeň"],
-        correct: 2
-      }
-    ];
-
-    const fiftyQuestion = {
-      question: "Ve kterém roce byl Masaryk zvolen prezidentem podruhé?",
-      options: ["1927", "1934"],
+<script>
+  const questions = [
+    {
+      question: "Jaké bylo rodné jméno T. G. Masaryka?",
+      options: ["Tomáš Jan Masaryk", "Tomáš Josef Masaryk", "Tomáš Karel Masaryk"],
       correct: 0
-    };
-
-    let current = 0;
-    let lives = 3;
-    let usedFifty = false;
-    let isFiftyQuestion = false;
-
-    function playSound(id) {
-      const sound = document.getElementById(id);
-      if (sound) {
-        sound.currentTime = 0;
-        sound.play();
-      }
+    },
+    {
+      question: "Kdy a kde se narodil T. G. Masaryk?",
+      options: ["14. září 1937 v Lánech", "7. března 1850 v Hodoníně", "1. ledna 1900 v Praze"],
+      correct: 1
+    },
+    {
+      question: "Kde se nachází letní prezidentské sídlo Masaryka?",
+      options: ["Hodonín", "Lány", "Třebíč"],
+      correct: 1
     }
+  ];
 
-    function updateHearts() {
-      const heartsDiv = document.getElementById("hearts");
-      heartsDiv.textContent = "❤️".repeat(lives);
+  let current = 0;
+  let lives = 3;
+  let usedFiftyFifty = false;
+
+  function playSound(id) {
+    const sound = document.getElementById(id);
+    if (sound) {
+      sound.currentTime = 0;
+      sound.play();
     }
+  }
 
-    function showQuestion() {
-      const quiz = document.getElementById("quiz");
-      const questionEl = document.getElementById("question");
-      const optionsEl = document.getElementById("options");
+  function updateHearts() {
+    document.getElementById("hearts").textContent = "❤️".repeat(lives);
+  }
 
-      if (isFiftyQuestion) {
-        questionEl.textContent = fiftyQuestion.question;
-        optionsEl.innerHTML = "";
-
-        fiftyQuestion.options.forEach((opt, i) => {
-          const btn = document.createElement("button");
-          btn.textContent = opt;
-          btn.onclick = () => checkFiftyAnswer(i);
-          optionsEl.appendChild(btn);
-        });
-
-      } else if (current < questions.length) {
-        const q = questions[current];
-        questionEl.textContent = q.question;
-        optionsEl.innerHTML = "";
-
-        q.options.forEach((opt, i) => {
-          const btn = document.createElement("button");
-          btn.textContent = opt;
-          btn.onclick = () => checkAnswer(i);
-          optionsEl.appendChild(btn);
-        });
-
-      } else {
-        quiz.style.display = "none";
-        document.getElementById("result").textContent = "Gratulujeme! Zvládl jsi všechny otázky o T. G. Masarykovi!";
-      }
-    }
-
-    function checkAnswer(choice) {
+  function showQuestion() {
+    if (current < questions.length) {
       const q = questions[current];
-      if (choice === q.correct) {
-        playSound("sound-correct");
-        current++;
-        setTimeout(showQuestion, 500);
-      } else {
-        playSound("sound-wrong");
-        lives--;
-        updateHearts();
-        if (lives === 0) {
-          document.getElementById("quiz").style.display = "none";
-          document.getElementById("result").textContent = "Nemáš žádná srdíčka. Hra končí.";
-        } else {
-          setTimeout(showQuestion, 500);
-        }
-      }
-    }
+      document.getElementById("question").textContent = q.question;
+      const optionsDiv = document.getElementById("options");
+      optionsDiv.innerHTML = "";
 
-    function useFifty() {
-      if (usedFifty || isFiftyQuestion) return;
-      usedFifty = true;
-      isFiftyQuestion = true;
-      document.getElementById("fiftyBtn").disabled = true;
+      q.options.forEach((option, i) => {
+        const button = document.createElement("button");
+        button.textContent = option;
+        button.onclick = () => checkAnswer(i);
+        optionsDiv.appendChild(button);
+      });
+
+    } else {
+      document.getElementById("quiz").style.display = "none";
+      document.getElementById("result").textContent = "Gratulujeme! Zvládl jsi všechny otázky o T. G. Masarykovi!";
+    }
+  }
+
+  function checkAnswer(choice) {
+    const q = questions[current];
+    const isCorrect = choice === q.correct;
+
+    if (isCorrect) {
+      playSound("sound-correct");
+      current++;
+      document.getElementById("fiftyBtn").disabled = usedFiftyFifty;
       showQuestion();
-    }
-
-    function checkFiftyAnswer(choice) {
-      if (choice === fiftyQuestion.correct) {
-        playSound("sound-correct");
+    } else {
+      playSound("sound-wrong");
+      lives--;
+      updateHearts();
+      if (lives === 0) {
+        document.getElementById("quiz").style.display = "none";
+        document.getElementById("result").textContent = "Nemáš žádná srdíčka. Hra končí.";
       } else {
-        playSound("sound-wrong");
-        lives--;
-        updateHearts();
-        if (lives === 0) {
-          document.getElementById("quiz").style.display = "none";
-          document.getElementById("result").textContent = "Nemáš žádná srdíčka. Hra končí.";
-          return;
-        }
+        current++;
+        document.getElementById("fiftyBtn").disabled = usedFiftyFifty;
+        showQuestion();
       }
-      isFiftyQuestion = false;
-      setTimeout(showQuestion, 500);
     }
+  }
 
-    updateHearts();
-    showQuestion();
-  </script>
+  function useFiftyFifty() {
+    if (usedFiftyFifty) return;
+
+    const q = questions[current];
+    const correctIndex = q.correct;
+    let incorrectIndexes = [];
+
+    q.options.forEach((_, i) => {
+      if (i !== correctIndex) incorrectIndexes.push(i);
+    });
+
+    // Vyber náhodně jednu špatnou odpověď
+    const randomIncorrect = incorrectIndexes[Math.floor(Math.random() * incorrectIndexes.length)];
+
+    // Ponech správnou a jednu špatnou
+    const optionsDiv = document.getElementById("options");
+    const buttons = optionsDiv.querySelectorAll("button");
+
+    buttons.forEach((btn, i) => {
+      if (i !== correctIndex && i !== randomIncorrect) {
+        btn.style.display = "none";
+      }
+    });
+
+    usedFiftyFifty = true;
+    document.getElementById("fiftyBtn").disabled = true;
+  }
+
+  updateHearts();
+  showQuestion();
+</script>
+
 </body>
 </html>
