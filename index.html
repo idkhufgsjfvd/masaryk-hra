@@ -8,24 +8,46 @@
       background-color: #001f3f;
       color: white;
       font-family: sans-serif;
-      text-align: center;
-      padding: 40px;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
     }
+
+    .layout {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      max-width: 1400px;
+      width: 100%;
+      padding: 40px 20px;
+    }
+
+    .side-img {
+      width: 200px;
+      height: auto;
+      margin: 0 20px;
+    }
+
     .container {
-      max-width: 700px;
-      margin: auto;
       background-color: #003366;
       padding: 20px;
       border-radius: 10px;
       box-shadow: 0 0 20px #000;
+      text-align: center;
+      max-width: 700px;
+      flex-grow: 1;
     }
+
     h1 {
       margin-bottom: 30px;
     }
+
     .question {
       font-size: 20px;
       margin-bottom: 20px;
     }
+
     .options button {
       display: block;
       width: 100%;
@@ -38,18 +60,22 @@
       border-radius: 5px;
       cursor: pointer;
     }
+
     .options button:hover {
       background-color: #0077cc;
     }
+
     .result {
       margin-top: 20px;
       font-size: 22px;
       font-weight: bold;
     }
+
     #hearts {
       font-size: 30px;
       margin-bottom: 20px;
     }
+
     #fifty-btn {
       margin-top: 15px;
       padding: 12px 30px;
@@ -60,6 +86,7 @@
       border-radius: 8px;
       cursor: pointer;
     }
+
     #fifty-btn:disabled {
       background-color: gray;
       cursor: not-allowed;
@@ -68,17 +95,27 @@
 </head>
 <body>
 
-  <div class="container">
-    <h1>Chcete být milionářem – T. G. Masaryk</h1>
-    <div id="hearts">❤️❤️❤️</div>
-    <div id="quiz">
-      <div class="question" id="question">Načítání otázky...</div>
-      <div class="options" id="options"></div>
-      <button id="fifty-btn" onclick="useFiftyFifty()">50 na 50</button>
+  <div class="layout">
+    <!-- Levý obrázek -->
+    <img src="tgm.jpg" alt="T. G. Masaryk" class="side-img">
+
+    <!-- Kvíz -->
+    <div class="container">
+      <h1>Chcete být milionářem – T. G. Masaryk</h1>
+      <div id="hearts">❤️❤️❤️</div>
+      <div id="quiz">
+        <div class="question" id="question">Načítání otázky...</div>
+        <div class="options" id="options"></div>
+        <button id="fifty-btn" onclick="useFiftyFifty()">50 na 50</button>
+      </div>
+      <div class="result" id="result"></div>
     </div>
-    <div class="result" id="result"></div>
+
+    <!-- Pravý obrázek (podpis) -->
+    <img src="podpis.png" alt="Podpis TGM" class="side-img">
   </div>
 
+  <!-- Zvuky -->
   <audio id="sound-correct" src="correct.mp3"></audio>
   <audio id="sound-wrong" src="wrong.mp3"></audio>
   <audio id="sound-win" src="win.mp3"></audio>
@@ -155,7 +192,6 @@
         }
       }
 
-      // po odpovědi skryj 50 na 50
       if (!fiftyUsed) {
         document.getElementById("fifty-btn").style.display = "inline-block";
       } else {
@@ -176,26 +212,5 @@
       const q = questions[current];
       const correct = q.correct;
 
-      // najdi dvě špatné odpovědi, které odstraníme
       const wrongIndices = [];
-      q.options.forEach((_, i) => {
-        if (i !== correct) wrongIndices.push(i);
-      });
-
-      // náhodně vyber jednu špatnou, kterou ponecháme
-      const wrongToKeep = wrongIndices[Math.floor(Math.random() * wrongIndices.length)];
-      const indicesToHide = wrongIndices.filter(i => i !== wrongToKeep);
-
-      // skryj dvě tlačítka
-      indicesToHide.forEach(i => {
-        const btn = document.getElementById(`option-${i}`);
-        if (btn) btn.style.display = "none";
-      });
-    }
-
-    showQuestion();
-    updateHearts();
-  </script>
-
-</body>
-</html>
+     
