@@ -115,6 +115,7 @@
   <audio id="sound-correct" src="correct.mp3"></audio>
   <audio id="sound-wrong" src="wrong.mp3"></audio>
   <audio id="sound-win" src="win.mp3"></audio>
+  <audio id="sound-lost" src="lost.mp3"></audio>
 
   <script>
     const questions = [
@@ -219,6 +220,7 @@
         lives--;
         updateHearts();
         if (lives === 0) {
+          playSound("sound-lost"); // >>> ZVUK PROHRY
           document.getElementById("quiz").style.display = "none";
           document.getElementById("result").textContent = "Nemáš žádná srdíčka. Hra končí.";
         } else {
