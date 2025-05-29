@@ -188,6 +188,7 @@
 
     function showQuestion() {
       if (current >= questions.length) {
+        playSound("sound-win");
         document.getElementById("quiz").style.display = "none";
         document.getElementById("result").textContent = "Gratulujeme! Zvládl jsi všechny otázky o T. G. Masarykovi!";
         return;
