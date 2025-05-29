@@ -20,7 +20,7 @@
       box-shadow: 0 0 20px #000;
     }
     h1 {
-      margin-bottom: 20px;
+      margin-bottom: 30px;
     }
     .question {
       font-size: 20px;
@@ -41,16 +41,6 @@
     .options button:hover {
       background-color: #0077cc;
     }
-    #fiftyBtn {
-      font-size: 20px;
-      padding: 10px 20px;
-      background-color: orange;
-      color: black;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      margin: 20px;
-    }
     .result {
       margin-top: 20px;
       font-size: 22px;
@@ -60,62 +50,63 @@
       font-size: 30px;
       margin-bottom: 20px;
     }
+    #fifty-btn {
+      margin-top: 15px;
+      padding: 12px 30px;
+      font-size: 18px;
+      background-color: #ffcc00;
+      color: black;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    #fifty-btn:disabled {
+      background-color: gray;
+      cursor: not-allowed;
+    }
   </style>
 </head>
 <body>
 
-<div class="container">
-  <h1>Chcete být milionářem – T. G. Masaryk</h1>
-  <div id="hearts">❤️❤️❤️</div>
-  <button id="fiftyBtn" onclick="useFiftyFifty()">50 na 50</button>
-  <div id="quiz">
-    <div class="question" id="question">Načítání otázky...</div>
-    <div class="options" id="options"></div>
+  <div class="container">
+    <h1>Chcete být milionářem – T. G. Masaryk</h1>
+    <div id="hearts">❤️❤️❤️</div>
+    <div id="quiz">
+      <div class="question" id="question">Načítání otázky...</div>
+      <div class="options" id="options"></div>
+      <button id="fifty-btn" onclick="useFiftyFifty()">50 na 50</button>
+    </div>
+    <div class="result" id="result"></div>
   </div>
-  <div class="result" id="result"></div>
-</div>
 
-<audio id="sound-correct" src="correct.mp3"></audio>
-<audio id="sound-wrong" src="wrong.mp3"></audio>
-<audio id="sound-win" src="win.mp3"></audio>
+  <audio id="sound-correct" src="correct.mp3"></audio>
+  <audio id="sound-wrong" src="wrong.mp3"></audio>
+  <audio id="sound-win" src="win.mp3"></audio>
 
-<script>
-  const questions = [
-    {
-      question: "Jaké bylo rodné jméno T. G. Masaryka?",
-      options: ["Tomáš Jan Masaryk", "Tomáš Josef Masaryk", "Tomáš Karel Masaryk"],
-      correct: 0
-    },
-    {
-      question: "Kdy a kde se narodil T. G. Masaryk?",
-      options: ["14. září 1937 v Lánech", "7. března 1850 v Hodoníně", "1. ledna 1900 v Praze"],
-      correct: 1
-    },
-    {
-      question: "Kde se nachází letní prezidentské sídlo Masaryka?",
-      options: ["Hodonín", "Lány", "Třebíč"],
-      correct: 1
-    }
-  ];
+  <script>
+    const questions = [
+      {
+        question: "Jaké bylo rodné jméno T. G. Masaryka?",
+        options: ["Tomáš Jan Masaryk", "Tomáš Josef Masaryk", "Tomáš Karel Masaryk", "Tomáš Ludvík Masaryk"],
+        correct: 0
+      },
+      {
+        question: "Kdy a kde se narodil T. G. Masaryk?",
+        options: ["14. září 1937 v Lánech", "7. března 1850 v Hodoníně", "7. března 1850 v Brně", "1. ledna 1900 v Praze"],
+        correct: 1
+      },
+      {
+        question: "Kdo přestavěl Pražský hrad za Masaryka?",
+        options: ["Karel IV.", "Jože Plečnik", "Jan Kaplický", "František Palacký"],
+        correct: 1
+      }
+    ];
 
-  let current = 0;
-  let lives = 3;
-  let usedFiftyFifty = false;
+    let current = 0;
+    let lives = 3;
+    let fiftyUsed = false;
 
-  function playSound(id) {
-    const sound = document.getElementById(id);
-    if (sound) {
-      sound.currentTime = 0;
-      sound.play();
-    }
-  }
-
-  function updateHearts() {
-    document.getElementById("hearts").textContent = "❤️".repeat(lives);
-  }
-
-  function showQuestion() {
-    if (current < questions.length) {
+    function showQuestion() {
       const q = questions[current];
       document.getElementById("question").textContent = q.question;
       const optionsDiv = document.getElementById("options");
@@ -125,70 +116,86 @@
         const button = document.createElement("button");
         button.textContent = option;
         button.onclick = () => checkAnswer(i);
+        button.id = `option-${i}`;
         optionsDiv.appendChild(button);
       });
-
-    } else {
-      document.getElementById("quiz").style.display = "none";
-      document.getElementById("result").textContent = "Gratulujeme! Zvládl jsi všechny otázky o T. G. Masarykovi!";
     }
-  }
 
-  function checkAnswer(choice) {
-    const q = questions[current];
-    const isCorrect = choice === q.correct;
+    function playSound(id) {
+      const sound = document.getElementById(id);
+      if (sound) {
+        sound.currentTime = 0;
+        sound.play();
+      }
+    }
 
-    if (isCorrect) {
-      playSound("sound-correct");
-      current++;
-      document.getElementById("fiftyBtn").disabled = usedFiftyFifty;
-      showQuestion();
-    } else {
-      playSound("sound-wrong");
-      lives--;
-      updateHearts();
-      if (lives === 0) {
-        document.getElementById("quiz").style.display = "none";
-        document.getElementById("result").textContent = "Nemáš žádná srdíčka. Hra končí.";
-      } else {
+    function checkAnswer(choice) {
+      const q = questions[current];
+
+      if (choice === q.correct) {
+        playSound("sound-correct");
         current++;
-        document.getElementById("fiftyBtn").disabled = usedFiftyFifty;
-        showQuestion();
+        if (current >= questions.length) {
+          document.getElementById("quiz").style.display = "none";
+          document.getElementById("result").textContent = "Gratulujeme! Zvládl jsi všechny otázky o T. G. Masarykovi!";
+          playSound("sound-win");
+        } else {
+          showQuestion();
+        }
+      } else {
+        playSound("sound-wrong");
+        lives--;
+        updateHearts();
+        if (lives === 0) {
+          document.getElementById("quiz").style.display = "none";
+          document.getElementById("result").textContent = "Nemáš žádná srdíčka. Hra končí.";
+        } else {
+          current++;
+          showQuestion();
+        }
+      }
+
+      // po odpovědi skryj 50 na 50
+      if (!fiftyUsed) {
+        document.getElementById("fifty-btn").style.display = "inline-block";
+      } else {
+        document.getElementById("fifty-btn").style.display = "none";
       }
     }
-  }
 
-  function useFiftyFifty() {
-    if (usedFiftyFifty) return;
+    function updateHearts() {
+      const heartsDiv = document.getElementById("hearts");
+      heartsDiv.textContent = "❤️".repeat(lives);
+    }
 
-    const q = questions[current];
-    const correctIndex = q.correct;
-    let incorrectIndexes = [];
+    function useFiftyFifty() {
+      if (fiftyUsed) return;
+      fiftyUsed = true;
+      document.getElementById("fifty-btn").disabled = true;
 
-    q.options.forEach((_, i) => {
-      if (i !== correctIndex) incorrectIndexes.push(i);
-    });
+      const q = questions[current];
+      const correct = q.correct;
 
-    // Vyber náhodně jednu špatnou odpověď
-    const randomIncorrect = incorrectIndexes[Math.floor(Math.random() * incorrectIndexes.length)];
+      // najdi dvě špatné odpovědi, které odstraníme
+      const wrongIndices = [];
+      q.options.forEach((_, i) => {
+        if (i !== correct) wrongIndices.push(i);
+      });
 
-    // Ponech správnou a jednu špatnou
-    const optionsDiv = document.getElementById("options");
-    const buttons = optionsDiv.querySelectorAll("button");
+      // náhodně vyber jednu špatnou, kterou ponecháme
+      const wrongToKeep = wrongIndices[Math.floor(Math.random() * wrongIndices.length)];
+      const indicesToHide = wrongIndices.filter(i => i !== wrongToKeep);
 
-    buttons.forEach((btn, i) => {
-      if (i !== correctIndex && i !== randomIncorrect) {
-        btn.style.display = "none";
-      }
-    });
+      // skryj dvě tlačítka
+      indicesToHide.forEach(i => {
+        const btn = document.getElementById(`option-${i}`);
+        if (btn) btn.style.display = "none";
+      });
+    }
 
-    usedFiftyFifty = true;
-    document.getElementById("fiftyBtn").disabled = true;
-  }
-
-  updateHearts();
-  showQuestion();
-</script>
+    showQuestion();
+    updateHearts();
+  </script>
 
 </body>
 </html>
