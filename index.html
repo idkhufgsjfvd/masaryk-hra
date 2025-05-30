@@ -22,14 +22,17 @@
       position: relative;
     }
 
-    h1 {
-      margin-bottom: 30px;
+    .question, .options button {
+      transition: opacity 0.5s ease;
+    }
+
+    .question.fade-out, .options.fade-out {
+      opacity: 0;
     }
 
     .question {
       font-size: 20px;
       margin-bottom: 20px;
-      transition: opacity 0.4s ease;
     }
 
     .options button {
@@ -43,10 +46,6 @@
       border: none;
       border-radius: 5px;
       cursor: pointer;
-    }
-
-    .options button:hover {
-      background-color: #0077cc;
     }
 
     .result {
@@ -71,131 +70,161 @@
       cursor: pointer;
     }
 
-    .highlight {
-      font-size: 40px;
-      font-weight: bold;
-      color: lime;
+    #leaderboard {
+      margin-top: 40px;
+      padding: 20px;
+      background-color: #002244;
+      border-radius: 10px;
+      box-shadow: 0 0 10px #000;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    table, th, td {
+      border: 1px solid #ccc;
+    }
+
+    th, td {
+      padding: 8px;
+    }
+
+    input[type="password"] {
+      padding: 6px;
+      border-radius: 6px;
+      border: none;
+      font-size: 16px;
+    }
+
+    #resetSection {
       margin-top: 20px;
     }
 
-    .side-image {
-      position: absolute;
-      top: 40px;
-      width: 150px;
-      height: auto;
+    .highlight {
+      font-size: 36px;
+      margin-top: 30px;
+      animation: fadeIn 1s ease-in-out;
     }
 
-    .left-img {
-      left: -160px;
-    }
-
-    .right-img {
-      right: -160px;
-    }
-
-    #leaderboard {
-      background-color: #004080;
-      padding: 15px;
-      border-radius: 10px;
-      margin-top: 40px;
-    }
-
-    @media (max-width: 768px) {
-      .side-image {
-        display: none;
-      }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.8); }
+      to { opacity: 1; transform: scale(1); }
     }
   </style>
 </head>
 <body>
 
-<div class="container">
-  <img src="masaryk.png" alt="T. G. Masaryk" class="side-image left-img">
-  <img src="masaryk2.png" alt="Podpis Masaryka" class="side-image right-img">
+  <div class="container">
+    <h1>Chcete být milionářem – T. G. Masaryk</h1>
 
-  <h1>Chcete být milionářem – T. G. Masaryk</h1>
+    <div id="hearts">❤️❤️❤️</div>
 
-  <div id="hearts">❤️❤️❤️</div>
+    <button id="fiftyBtn" onclick="useFiftyFifty()">Použít 50 na 50</button>
 
-  <button id="fiftyBtn" onclick="useFiftyFifty()">Použít 50 na 50</button>
+    <div id="quiz">
+      <div class="question" id="question">Načítání otázky...</div>
+      <div class="options" id="options"></div>
+    </div>
 
-  <div id="quiz">
-    <div class="question" id="question">Načítání otázky...</div>
-    <div class="options" id="options"></div>
+    <div class="result" id="result"></div>
+
+    <div id="resetSection">
+      <input type="password" id="resetPass" placeholder="Zadej heslo pro reset">
+      <button onclick="resetLeaderboard()">Reset žebříčku</button>
+    </div>
+
+    <div id="leaderboard">
+      <h2>Žebříček nejlepších</h2>
+      <table>
+        <thead>
+          <tr><th>Jméno</th><th>Čas (s)</th></tr>
+        </thead>
+        <tbody id="leaderboardBody"></tbody>
+      </table>
+    </div>
   </div>
 
-  <div class="result" id="result"></div>
-  <div class="highlight" id="endMessage"></div>
+  <audio id="sound-correct" src="correct.mp3"></audio>
+  <audio id="sound-wrong" src="wrong.mp3"></audio>
+  <audio id="sound-win" src="win.mp3"></audio>
+  <audio id="sound-lost" src="lost.mp3"></audio>
 
-  <div id="leaderboard">
-    <h2>Žebříček</h2>
-    <ul id="leaderboardList"></ul>
-  </div>
-</div>
+  <script>
+    const questions = [/* otázky zde zůstávají stejné jako dříve */];
 
-<audio id="sound-correct" src="correct.mp3"></audio>
-<audio id="sound-wrong" src="wrong.mp3"></audio>
-<audio id="sound-win" src="win.mp3"></audio>
-<audio id="sound-lost" src="lost.mp3"></audio>
+    let current = 0;
+    let lives = 3;
+    let usedFifty = false;
+    let playerName = '';
+    let startTime = Date.now();
+    let finished = false;
 
-<script>
-  const questions = [ /* otázky jako v předchozí verzi */ ];
-
-  let current = 0;
-  let lives = 3;
-  let usedFifty = false;
-  let playerName = prompt("Zadej své jméno:");
-  let startTime = Date.now();
-
-  function updateHearts() {
-    document.getElementById("hearts").textContent = "❤️".repeat(lives);
-  }
-
-  function playSound(id) {
-    const sound = document.getElementById(id);
-    if (sound) {
-      sound.currentTime = 0;
-      sound.play();
-    }
-  }
-
-  function showQuestion() {
-    if (current >= questions.length) {
-      const totalTime = Math.floor((Date.now() - startTime) / 1000);
-      playSound("sound-win");
-      document.getElementById("quiz").style.display = "none";
-      document.getElementById("result").textContent = "";
-      document.getElementById("endMessage").textContent = "VYHRÁL JSI!";
-      saveScore(playerName, totalTime);
-      return;
+    if (!sessionStorage.getItem("startTime")) {
+      sessionStorage.setItem("startTime", Date.now());
     }
 
-    const q = questions[current];
-    const optionsDiv = document.getElementById("options");
-    const questionEl = document.getElementById("question");
+    playerName = prompt("Zadej své jméno:");
+    while (!playerName || playerName.trim().length < 1) {
+      playerName = prompt("Zadej platné jméno:");
+    }
 
-    questionEl.style.opacity = "1";
-    questionEl.textContent = q.question;
-    optionsDiv.innerHTML = "";
+    function updateHearts() {
+      document.getElementById("hearts").textContent = "❤️".repeat(lives);
+    }
 
-    q.options.forEach((option, i) => {
-      const button = document.createElement("button");
-      button.textContent = option;
-      button.onclick = () => checkAnswer(i);
-      button.dataset.index = i;
-      optionsDiv.appendChild(button);
-    });
-  }
+    function playSound(id) {
+      const sound = document.getElementById(id);
+      if (sound) {
+        sound.currentTime = 0;
+        sound.play();
+      }
+    }
 
-  function checkAnswer(choice) {
-    const q = questions[current];
-    const questionEl = document.getElementById("question");
-    questionEl.style.opacity = "0";
+    function showQuestion() {
+      if (current >= questions.length) {
+        playSound("sound-win");
+        const endTime = Date.now();
+        const totalTime = Math.round((endTime - parseInt(sessionStorage.getItem("startTime"))) / 1000);
 
-    setTimeout(() => {
+        document.getElementById("quiz").style.display = "none";
+        document.getElementById("result").innerHTML = `<div class="highlight">VYHRÁL JSI!</div>`;
+        if (!finished && totalTime > 0) {
+          saveToLeaderboard(playerName, totalTime);
+          finished = true;
+        }
+        loadLeaderboard();
+        return;
+      }
+
+      const q = questions[current];
+      const questionEl = document.getElementById("question");
+      const optionsDiv = document.getElementById("options");
+
+      questionEl.classList.remove("fade-out");
+      optionsDiv.classList.remove("fade-out");
+
+      questionEl.textContent = q.question;
+      optionsDiv.innerHTML = "";
+
+      q.options.forEach((option, i) => {
+        const button = document.createElement("button");
+        button.textContent = option;
+        button.onclick = () => checkAnswer(i);
+        button.dataset.index = i;
+        optionsDiv.appendChild(button);
+      });
+    }
+
+    function checkAnswer(choice) {
+      const q = questions[current];
+      const questionEl = document.getElementById("question");
+      const optionsDiv = document.getElementById("options");
+
       if (choice === q.correct) {
         playSound("sound-correct");
-        current++;
       } else {
         playSound("sound-wrong");
         lives--;
@@ -203,59 +232,76 @@
         if (lives === 0) {
           playSound("sound-lost");
           document.getElementById("quiz").style.display = "none";
-          document.getElementById("endMessage").textContent = "PROHRÁL JSI!";
+          document.getElementById("result").innerHTML = `<div class="highlight">PROHRÁL JSI!</div>`;
           return;
-        } else {
-          current++;
         }
       }
-      showQuestion();
-    }, 400);
-  }
 
-  function useFiftyFifty() {
-    if (usedFifty) return;
-    usedFifty = true;
-    document.getElementById("fiftyBtn").style.display = "none";
+      questionEl.classList.add("fade-out");
+      optionsDiv.classList.add("fade-out");
 
-    const q = questions[current];
-    const correct = q.correct;
-    const wrong = [...q.options.keys()].filter(i => i !== correct);
-    const keptWrong = wrong[Math.floor(Math.random() * wrong.length)];
-    const keep = [correct, keptWrong];
+      setTimeout(() => {
+        current++;
+        showQuestion();
+      }, 600);
+    }
 
-    const buttons = document.querySelectorAll("#options button");
-    buttons.forEach(btn => {
-      if (!keep.includes(Number(btn.dataset.index))) {
-        btn.style.display = "none";
+    function useFiftyFifty() {
+      if (usedFifty) return;
+      usedFifty = true;
+      document.getElementById("fiftyBtn").style.display = "none";
+
+      const q = questions[current];
+      const options = [...q.options.keys()];
+      const correct = q.correct;
+      const wrong = options.filter(i => i !== correct);
+      const keptWrong = wrong[Math.floor(Math.random() * wrong.length)];
+      const keep = [correct, keptWrong];
+
+      const buttons = document.querySelectorAll("#options button");
+      buttons.forEach(btn => {
+        if (!keep.includes(Number(btn.dataset.index))) {
+          btn.style.display = "none";
+        }
+      });
+    }
+
+    function saveToLeaderboard(name, time) {
+      const entry = { name, time };
+      const board = JSON.parse(localStorage.getItem("leaderboard") || "[]");
+      board.push(entry);
+      board.sort((a, b) => a.time - b.time);
+      localStorage.setItem("leaderboard", JSON.stringify(board));
+    }
+
+    function loadLeaderboard() {
+      const board = JSON.parse(localStorage.getItem("leaderboard") || "[]");
+      const body = document.getElementById("leaderboardBody");
+      body.innerHTML = "";
+      board.forEach(entry => {
+        const row = document.createElement("tr");
+        row.innerHTML = `<td>${entry.name}</td><td>${entry.time}</td>`;
+        body.appendChild(row);
+      });
+    }
+
+    function resetLeaderboard() {
+      const input = document.getElementById("resetPass");
+      const value = input.value;
+      if (value === "rorysekjindra12345") {
+        localStorage.removeItem("leaderboard");
+        loadLeaderboard();
+        alert("Žebříček byl úspěšně resetován.");
+      } else {
+        alert("Nesprávné heslo!");
       }
-    });
-  }
+      input.value = "";
+    }
 
-  function saveScore(name, time) {
-    if (!name) return;
-    const scores = JSON.parse(localStorage.getItem("leaderboard") || "[]");
-    scores.push({ name, time });
-    scores.sort((a, b) => a.time - b.time);
-    localStorage.setItem("leaderboard", JSON.stringify(scores));
-    displayLeaderboard();
-  }
-
-  function displayLeaderboard() {
-    const scores = JSON.parse(localStorage.getItem("leaderboard") || "[]");
-    const list = document.getElementById("leaderboardList");
-    list.innerHTML = "";
-    scores.forEach((entry, index) => {
-      const li = document.createElement("li");
-      li.textContent = `${index + 1}. ${entry.name} – ${entry.time} sekund`;
-      list.appendChild(li);
-    });
-  }
-
-  updateHearts();
-  displayLeaderboard();
-  showQuestion();
-</script>
+    updateHearts();
+    loadLeaderboard();
+    showQuestion();
+  </script>
 
 </body>
 </html>
