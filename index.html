@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="cs">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Chcete být milionářem – T. G. Masaryk</title>
   <style>
     body {
@@ -29,7 +29,7 @@
     .question {
       font-size: 20px;
       margin-bottom: 20px;
-      transition: opacity 0.5s;
+      transition: opacity 0.4s ease;
     }
 
     .options button {
@@ -51,9 +51,8 @@
 
     .result {
       margin-top: 20px;
-      font-size: 32px;
+      font-size: 28px;
       font-weight: bold;
-      text-transform: uppercase;
     }
 
     #hearts {
@@ -72,67 +71,76 @@
       cursor: pointer;
     }
 
-    .side-image {
-      position: absolute;
-      top: 40px;
-      width: 150px;
-      height: auto;
+    .animated {
+      font-size: 40px;
+      font-weight: bold;
+      animation: popIn 1s ease forwards;
+      margin-top: 20px;
     }
 
-    .left-img {
-      left: -160px;
-    }
-
-    .right-img {
-      right: -160px;
+    @keyframes popIn {
+      0% { transform: scale(0); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
     }
 
     #leaderboard {
-      margin-top: 30px;
-      background-color: #002244;
+      margin-top: 40px;
+      border: 2px solid white;
       padding: 20px;
       border-radius: 10px;
-      border: 2px solid white;
+      background-color: #002244;
     }
 
-    #leaderboard h2 {
-      margin-bottom: 10px;
+    table {
+      width: 100%;
+      color: white;
+      border-collapse: collapse;
     }
 
-    @media (max-width: 768px) {
-      .side-image {
-        display: none;
-      }
+    th, td {
+      padding: 10px;
+      border-bottom: 1px solid #555;
+    }
+
+    input[type="password"] {
+      padding: 5px;
+      margin-top: 10px;
+    }
+
+    .hidden {
+      display: none;
     }
   </style>
 </head>
 <body>
 
-<script>
-  sessionStorage.clear(); // RESET STAVU při každém načtení stránky
-</script>
-
 <div class="container">
-  <img src="masaryk.png" alt="T. G. Masaryk" class="side-image left-img">
-  <img src="masaryk2.png" alt="Podpis Masaryka" class="side-image right-img">
-
   <h1>Chcete být milionářem – T. G. Masaryk</h1>
 
-  <div id="hearts">❤️❤️❤️</div>
-
-  <button id="fiftyBtn" onclick="useFiftyFifty()">Použít 50 na 50</button>
-
-  <div id="quiz">
-    <div class="question" id="question">Načítání otázky...</div>
-    <div class="options" id="options"></div>
+  <div id="startScreen">
+    <p>Zadej své jméno:</p>
+    <input type="text" id="playerName" />
+    <button onclick="startGame()">Začít hru</button>
   </div>
 
-  <div class="result" id="result"></div>
+  <div id="quizContainer" class="hidden">
+    <div id="hearts">❤️❤️❤️</div>
+    <button id="fiftyBtn" onclick="useFiftyFifty()">Použít 50 na 50</button>
+    <div id="quiz">
+      <div class="question" id="question"></div>
+      <div class="options" id="options"></div>
+    </div>
+    <div class="result" id="result"></div>
+    <div id="endMessage" class="animated"></div>
+  </div>
 
   <div id="leaderboard">
-    <h2>Žebříček</h2>
-    <ol id="scores"></ol>
-    <input type="password" id="resetPassword" placeholder="Zadejte heslo pro reset">
+    <h2>Žebříček hráčů</h2>
+    <table id="leaderboardTable">
+      <thead><tr><th>Jméno</th><th>Čas (s)</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <input type="password" id="resetPassword" placeholder="Zadej heslo na reset" />
     <button onclick="resetLeaderboard()">Resetovat žebříček</button>
   </div>
 </div>
@@ -143,8 +151,193 @@
 <audio id="sound-lost" src="lost.mp3"></audio>
 
 <script>
-// Zbytek funkčního JavaScriptu včetně otázek, časovače, správného ukládání a načítání žebříčku z localStorage...
-</script>
+  const questions = [
+    {
+      question: "Jaké bylo rodné jméno T. G. Masaryka?",
+      options: ["Tomáš Jan Masaryk", "Tomáš Josef Masaryk", "Tomáš Karel Masaryk", "Tomáš Ludvík Masaryk"],
+      correct: 0
+    },
+    {
+      question: "Kdy a kde se narodil T. G. Masaryk?",
+      options: ["14. září 1937 v Lánech", "7. března 1850 v Hodoníně", "7. března 1850 v Brně", "1. ledna 1900 v Praze"],
+      correct: 1
+    },
+    {
+      question: "Kdy a kde zemřel T. G. Masaryk?",
+      options: ["14. září 1937 v Lánech", "28. října 1918 v Hodoníně", "7. března 1937 v Praze", "14. září 1937 v Brně"],
+      correct: 0
+    },
+    {
+      question: "Kolik měl Masaryk dětí?",
+      options: ["3", "4", "5", "6"],
+      correct: 2
+    },
+    {
+      question: "Které z těchto jmen nepatří mezi děti Masaryka?",
+      options: ["Alice", "Herbert", "Jan", "Karel"],
+      correct: 3
+    },
+    {
+      question: "Jaké zaměstnání T. G. Masaryk během života vykonával?",
+      options: ["pouze politik", "kovář, učitel, profesor, státník", "voják a generál", "lékař a chemik"],
+      correct: 1
+    },
+    {
+      question: "Kde se nachází letní prezidentské sídlo Masaryka?",
+      options: ["Hodonín", "Třebíč", "Lány", "Vídeň"],
+      correct: 2
+    },
+    {
+      question: "Kdo přestavěl Pražský hrad za Masaryka?",
+      options: ["Karel IV.", "Jože Plečnik", "Jan Kaplický", "František Palacký"],
+      correct: 1
+    },
+    {
+      question: "Za co bojoval Masaryk během Hilsneriády?",
+      options: ["za monarchii", "proti antisemitismu", "za absolutismus", "proti industrializaci"],
+      correct: 1
+    },
+    {
+      question: "Který stát Masaryk pomáhal založit jako prezident?",
+      options: ["Rakousko", "Německo", "Československo", "Slovenský štát"],
+      correct: 2
+    }
+  ];
 
+  let current = 0;
+  let lives = 3;
+  let usedFifty = false;
+  let player = "";
+  let startTime;
+
+  function startGame() {
+    player = document.getElementById("playerName").value.trim();
+    if (!player) return alert("Zadej své jméno.");
+    sessionStorage.clear(); // smaže zůstání na konci
+    startTime = Date.now();
+    document.getElementById("startScreen").classList.add("hidden");
+    document.getElementById("quizContainer").classList.remove("hidden");
+    showQuestion();
+    updateHearts();
+  }
+
+  function updateHearts() {
+    document.getElementById("hearts").textContent = "❤️".repeat(lives);
+  }
+
+  function playSound(id) {
+    const sound = document.getElementById(id);
+    if (sound) {
+      sound.currentTime = 0;
+      sound.play();
+    }
+  }
+
+  function showQuestion() {
+    const q = questions[current];
+    if (!q) return;
+
+    const questionDiv = document.getElementById("question");
+    const optionsDiv = document.getElementById("options");
+    questionDiv.style.opacity = "0";
+    optionsDiv.innerHTML = "";
+
+    setTimeout(() => {
+      questionDiv.textContent = q.question;
+      q.options.forEach((opt, i) => {
+        const btn = document.createElement("button");
+        btn.textContent = opt;
+        btn.onclick = () => checkAnswer(i);
+        btn.dataset.index = i;
+        optionsDiv.appendChild(btn);
+      });
+      questionDiv.style.opacity = "1";
+    }, 400);
+  }
+
+  function checkAnswer(choice) {
+    const q = questions[current];
+    if (choice === q.correct) {
+      playSound("sound-correct");
+    } else {
+      playSound("sound-wrong");
+      lives--;
+      updateHearts();
+    }
+
+    current++;
+
+    if (lives === 0) {
+      playSound("sound-lost");
+      document.getElementById("quiz").style.display = "none";
+      document.getElementById("result").textContent = "";
+      document.getElementById("endMessage").textContent = "PROHRÁL JSI!";
+      return;
+    }
+
+    if (current >= questions.length) {
+      const time = Math.floor((Date.now() - startTime) / 1000);
+      playSound("sound-win");
+      document.getElementById("quiz").style.display = "none";
+      document.getElementById("endMessage").textContent = "VYHRÁL JSI!";
+      saveScore(player, time);
+      loadLeaderboard();
+    } else {
+      showQuestion();
+    }
+  }
+
+  function useFiftyFifty() {
+    if (usedFifty) return;
+    usedFifty = true;
+    document.getElementById("fiftyBtn").style.display = "none";
+
+    const q = questions[current];
+    const correct = q.correct;
+    const wrong = q.options.map((_, i) => i).filter(i => i !== correct);
+    const remove = wrong.sort(() => 0.5 - Math.random()).slice(0, 2);
+
+    document.querySelectorAll("#options button").forEach(btn => {
+      if (remove.includes(Number(btn.dataset.index))) {
+        btn.style.display = "none";
+      }
+    });
+  }
+
+  function saveScore(name, time) {
+    const scores = JSON.parse(localStorage.getItem("leaderboard") || "[]");
+    scores.push({ name, time });
+    scores.sort((a, b) => a.time - b.time);
+    localStorage.setItem("leaderboard", JSON.stringify(scores));
+  }
+
+  function loadLeaderboard() {
+    const scores = JSON.parse(localStorage.getItem("leaderboard") || "[]");
+    const tbody = document.querySelector("#leaderboardTable tbody");
+    tbody.innerHTML = "";
+    scores.forEach(s => {
+      const row = document.createElement("tr");
+      row.innerHTML = `<td>${s.name}</td><td>${s.time}</td>`;
+      tbody.appendChild(row);
+    });
+  }
+
+  function resetLeaderboard() {
+    const pwd = document.getElementById("resetPassword").value;
+    if (pwd === "rorysekjindra12345") {
+      localStorage.removeItem("leaderboard");
+      loadLeaderboard();
+      alert("Žebříček byl resetován.");
+    } else {
+      alert("Špatné heslo.");
+    }
+  }
+
+  // Vždy začni od začátku
+  window.onload = () => {
+    sessionStorage.clear();
+    loadLeaderboard();
+  };
+</script>
 </body>
 </html>
