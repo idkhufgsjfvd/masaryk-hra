@@ -42,6 +42,7 @@
       border: none;
       border-radius: 5px;
       cursor: pointer;
+      transition: opacity 0.5s ease;
     }
 
     .options button:hover {
@@ -85,6 +86,10 @@
       right: -160px;
     }
 
+    #startScreen, #quiz, #resultScreen {
+      display: none;
+    }
+
     @media (max-width: 768px) {
       .side-image {
         display: none;
@@ -92,14 +97,8 @@
     }
 
     .fade-out {
-      animation: fadeOut 0.8s forwards;
-    }
-
-    @keyframes fadeOut {
-      to {
-        opacity: 0;
-        transform: scale(0.8);
-      }
+      opacity: 0;
+      transition: opacity 0.5s ease;
     }
   </style>
 </head>
@@ -111,8 +110,14 @@
 
     <h1>Chcete být milionářem – T. G. Masaryk</h1>
 
-    <div id="hearts">❤️❤️❤️</div>
+    <div id="startScreen">
+      <p>Zadej své jméno:</p>
+      <input type="text" id="playerNameInput">
+      <br><br>
+      <button onclick="startGame()">Začít hru</button>
+    </div>
 
+    <div id="hearts">❤️❤️❤️</div>
     <button id="fiftyBtn" onclick="useFiftyFifty()">Použít 50 na 50</button>
 
     <div id="quiz">
@@ -120,7 +125,11 @@
       <div class="options" id="options"></div>
     </div>
 
-    <div class="result" id="result"></div>
+    <div id="resultScreen" class="result">
+      <p id="finalMessage"></p>
+      <h2>Žebříček</h2>
+      <ol id="leaderboard"></ol>
+    </div>
   </div>
 
   <audio id="sound-correct" src="correct.mp3"></audio>
@@ -130,61 +139,24 @@
 
   <script>
     const questions = [
-      {
-        question: "Jaké bylo rodné jméno T. G. Masaryka?",
-        options: ["Tomáš Jan Masaryk", "Tomáš Josef Masaryk", "Tomáš Karel Masaryk", "Tomáš Ludvík Masaryk"],
-        correct: 0
-      },
-      {
-        question: "Kdy a kde se narodil T. G. Masaryk?",
-        options: ["14. září 1937 v Lánech", "7. března 1850 v Hodoníně", "7. března 1850 v Brně", "1. ledna 1900 v Praze"],
-        correct: 1
-      },
-      {
-        question: "Kdy a kde zemřel T. G. Masaryk?",
-        options: ["14. září 1937 v Lánech", "28. října 1918 v Hodoníně", "7. března 1937 v Praze", "14. září 1937 v Brně"],
-        correct: 0
-      },
-      {
-        question: "Kolik měl Masaryk dětí?",
-        options: ["3", "4", "5", "6"],
-        correct: 2
-      },
-      {
-        question: "Které z těchto jmen nepatří mezi děti Masaryka?",
-        options: ["Alice", "Herbert", "Jan", "Karel"],
-        correct: 3
-      },
-      {
-        question: "Jaké zaměstnání T. G. Masaryk během života vykonával?",
-        options: ["pouze politik", "kovář, učitel, profesor, státník", "voják a generál", "lékař a chemik"],
-        correct: 1
-      },
-      {
-        question: "Kde se nachází letní prezidentské sídlo Masaryka?",
-        options: ["Hodonín", "Třebíč", "Lány", "Vídeň"],
-        correct: 2
-      },
-      {
-        question: "Kdo přestavěl Pražský hrad za Masaryka?",
-        options: ["Karel IV.", "Jože Plečnik", "Jan Kaplický", "František Palacký"],
-        correct: 1
-      },
-      {
-        question: "Za co bojoval Masaryk během Hilsneriády?",
-        options: ["za monarchii", "proti antisemitismu", "za absolutismus", "proti industrializaci"],
-        correct: 1
-      },
-      {
-        question: "Který stát Masaryk pomáhal založit jako prezident?",
-        options: ["Rakousko", "Německo", "Československo", "Slovenský štát"],
-        correct: 2
-      }
+      { question: "Jaké bylo rodné jméno T. G. Masaryka?", options: ["Tomáš Jan Masaryk", "Tomáš Josef Masaryk", "Tomáš Karel Masaryk", "Tomáš Ludvík Masaryk"], correct: 0 },
+      { question: "Kdy a kde se narodil T. G. Masaryk?", options: ["14. září 1937 v Lánech", "7. března 1850 v Hodoníně", "7. března 1850 v Brně", "1. ledna 1900 v Praze"], correct: 1 },
+      { question: "Kdy a kde zemřel T. G. Masaryk?", options: ["14. září 1937 v Lánech", "28. října 1918 v Hodoníně", "7. března 1937 v Praze", "14. září 1937 v Brně"], correct: 0 },
+      { question: "Kolik měl Masaryk dětí?", options: ["3", "4", "5", "6"], correct: 2 },
+      { question: "Které z těchto jmen nepatří mezi děti Masaryka?", options: ["Alice", "Herbert", "Jan", "Karel"], correct: 3 },
+      { question: "Jaké zaměstnání T. G. Masaryk během života vykonával?", options: ["pouze politik", "kovář, učitel, profesor, státník", "voják a generál", "lékař a chemik"], correct: 1 },
+      { question: "Kde se nachází letní prezidentské sídlo Masaryka?", options: ["Hodonín", "Třebíč", "Lány", "Vídeň"], correct: 2 },
+      { question: "Kdo přestavěl Pražský hrad za Masaryka?", options: ["Karel IV.", "Jože Plečnik", "Jan Kaplický", "František Palacký"], correct: 1 },
+      { question: "Za co bojoval Masaryk během Hilsneriády?", options: ["za monarchii", "proti antisemitismu", "za absolutismus", "proti industrializaci"], correct: 1 },
+      { question: "Který stát Masaryk pomáhal založit jako prezident?", options: ["Rakousko", "Německo", "Československo", "Slovenský štát"], correct: 2 }
     ];
 
     let current = 0;
     let lives = 3;
     let usedFifty = false;
+    let playerName = "";
+
+    document.getElementById("startScreen").style.display = "block";
 
     function updateHearts() {
       document.getElementById("hearts").textContent = "❤️".repeat(lives);
@@ -198,11 +170,23 @@
       }
     }
 
+    function startGame() {
+      const nameInput = document.getElementById("playerNameInput");
+      playerName = nameInput.value.trim();
+      if (!playerName) {
+        alert("Zadejte jméno!");
+        return;
+      }
+
+      document.getElementById("startScreen").style.display = "none";
+      document.getElementById("quiz").style.display = "block";
+      updateHearts();
+      showQuestion();
+    }
+
     function showQuestion() {
       if (current >= questions.length) {
-        playSound("sound-win");
-        document.getElementById("quiz").style.display = "none";
-        document.getElementById("result").textContent = "Gratulujeme! Zvládl jsi všechny otázky o T. G. Masarykovi!";
+        endGame(true);
         return;
       }
 
@@ -214,44 +198,51 @@
       q.options.forEach((option, i) => {
         const button = document.createElement("button");
         button.textContent = option;
-        button.onclick = () => checkAnswer(i);
         button.dataset.index = i;
+        button.onclick = () => checkAnswer(i);
         optionsDiv.appendChild(button);
       });
     }
 
     function checkAnswer(choice) {
       const q = questions[current];
-      const quizDiv = document.getElementById("quiz");
+      const optionsDiv = document.getElementById("options");
+      const buttons = optionsDiv.querySelectorAll("button");
+
+      buttons.forEach(btn => btn.disabled = true);
 
       if (choice === q.correct) {
         playSound("sound-correct");
       } else {
         playSound("sound-wrong");
+        lives--;
+        updateHearts();
       }
 
-      quizDiv.classList.add("fade-out");
-
       setTimeout(() => {
-        quizDiv.classList.remove("fade-out");
-
-        if (choice === q.correct) {
-          current++;
-        } else {
-          lives--;
-          updateHearts();
+        fadeOutQuestion(() => {
           if (lives === 0) {
             playSound("sound-lost");
-            quizDiv.style.display = "none";
-            document.getElementById("result").textContent = "Nemáš žádná srdíčka. Hra končí.";
-            return;
+            endGame(false);
           } else {
             current++;
+            showQuestion();
           }
-        }
-
-        showQuestion();
+        });
       }, 800);
+    }
+
+    function fadeOutQuestion(callback) {
+      const question = document.getElementById("question");
+      const options = document.querySelectorAll("#options button");
+      question.classList.add("fade-out");
+      options.forEach(btn => btn.classList.add("fade-out"));
+
+      setTimeout(() => {
+        question.classList.remove("fade-out");
+        options.forEach(btn => btn.classList.remove("fade-out"));
+        callback();
+      }, 500);
     }
 
     function useFiftyFifty() {
@@ -260,24 +251,48 @@
       document.getElementById("fiftyBtn").style.display = "none";
 
       const q = questions[current];
-      const options = [...q.options.keys()];
       const correct = q.correct;
+      const wrong = [...q.options.keys()].filter(i => i !== correct);
+      const keepWrong = wrong[Math.floor(Math.random() * wrong.length)];
+      const keep = [correct, keepWrong];
 
-      const wrong = options.filter(i => i !== correct);
-      const keptWrong = wrong[Math.floor(Math.random() * wrong.length)];
-
-      const keep = [correct, keptWrong];
-
-      const buttons = document.querySelectorAll("#options button");
-      buttons.forEach(btn => {
+      document.querySelectorAll("#options button").forEach(btn => {
         if (!keep.includes(Number(btn.dataset.index))) {
           btn.style.display = "none";
         }
       });
     }
 
-    updateHearts();
-    showQuestion();
+    function endGame(won) {
+      document.getElementById("quiz").style.display = "none";
+      document.getElementById("resultScreen").style.display = "block";
+
+      const finalMessage = document.getElementById("finalMessage");
+      finalMessage.textContent = won ?
+        `Gratulujeme, ${playerName}! Odpověděl jsi správně na všechny otázky!` :
+        `Konec hry, ${playerName}. Došla ti srdíčka.`;
+
+      saveScore(playerName, current);
+      showLeaderboard();
+    }
+
+    function saveScore(name, score) {
+      const leaderboard = JSON.parse(localStorage.getItem("leaderboard") || "[]");
+      leaderboard.push({ name, score });
+      leaderboard.sort((a, b) => b.score - a.score);
+      localStorage.setItem("leaderboard", JSON.stringify(leaderboard.slice(0, 10)));
+    }
+
+    function showLeaderboard() {
+      const leaderboard = JSON.parse(localStorage.getItem("leaderboard") || "[]");
+      const list = document.getElementById("leaderboard");
+      list.innerHTML = "";
+      leaderboard.forEach(entry => {
+        const li = document.createElement("li");
+        li.textContent = `${entry.name} – ${entry.score} bodů`;
+        list.appendChild(li);
+      });
+    }
   </script>
 
 </body>
