@@ -195,7 +195,7 @@
     let lives = 3;
     let usedFifty = false;
     let startTime, playerName;
-    const leaderboard = [];
+    let leaderboard = [];
 
     function updateHearts() {
       document.getElementById("hearts").textContent = "❤️".repeat(lives);
@@ -207,6 +207,16 @@
         sound.currentTime = 0;
         sound.play();
       }
+    }
+
+    function loadLeaderboard() {
+      const data = localStorage.getItem("leaderboard");
+      leaderboard = data ? JSON.parse(data) : [];
+      renderLeaderboard();
+    }
+
+    function saveLeaderboard() {
+      localStorage.setItem("leaderboard", JSON.stringify(leaderboard));
     }
 
     function startGame() {
@@ -233,6 +243,7 @@
 
         leaderboard.push({ name: playerName, time: timeTaken });
         leaderboard.sort((a, b) => a.time - b.time);
+        saveLeaderboard();
         renderLeaderboard();
         return;
       }
@@ -299,12 +310,15 @@
     function renderLeaderboard() {
       const list = document.getElementById("scoreList");
       list.innerHTML = "";
-      leaderboard.forEach((entry, i) => {
+      leaderboard.forEach((entry) => {
         const li = document.createElement("li");
         li.textContent = `${entry.name} – ${entry.time} sekund`;
         list.appendChild(li);
       });
     }
+
+    // Načti žebříček po načtení stránky
+    window.onload = loadLeaderboard;
   </script>
 </body>
 </html>
