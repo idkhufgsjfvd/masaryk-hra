@@ -108,6 +108,19 @@
       margin-bottom: 30px;
       cursor: pointer;
     }
+
+    .big-message {
+      font-size: 60px;
+      font-weight: bold;
+      color: yellow;
+      margin-top: 40px;
+      animation: fadeInScale 1s ease-out;
+    }
+
+    @keyframes fadeInScale {
+      0% { opacity: 0; transform: scale(0.8); }
+      100% { opacity: 1; transform: scale(1); }
+    }
   </style>
 </head>
 <body>
@@ -134,6 +147,7 @@
       </div>
 
       <div class="result" id="result"></div>
+      <div id="finalMessage"></div>
     </div>
 
     <div id="leaderboard">
@@ -199,6 +213,7 @@
         playSound("sound-win");
         document.getElementById("quiz").style.display = "none";
         document.getElementById("result").textContent = `Gratulujeme, vyhrál jsi! Čas: ${timeTaken} sekund.`;
+        document.getElementById("finalMessage").innerHTML = `<div class="big-message">VYHRÁL JSI!</div>`;
 
         leaderboard.push({ name: playerName, time: timeTaken });
         leaderboard.sort((a, b) => a.time - b.time);
@@ -237,6 +252,7 @@
             playSound("sound-lost");
             document.getElementById("quiz").style.display = "none";
             document.getElementById("result").textContent = "Konec hry – došla ti srdíčka.";
+            document.getElementById("finalMessage").innerHTML = `<div class="big-message">PROHRÁL JSI!</div>`;
             return;
           }
         }
