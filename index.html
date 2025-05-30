@@ -90,6 +90,17 @@
         display: none;
       }
     }
+
+    .fade-out {
+      animation: fadeOut 0.8s forwards;
+    }
+
+    @keyframes fadeOut {
+      to {
+        opacity: 0;
+        transform: scale(0.8);
+      }
+    }
   </style>
 </head>
 <body>
@@ -211,23 +222,36 @@
 
     function checkAnswer(choice) {
       const q = questions[current];
+      const quizDiv = document.getElementById("quiz");
+
       if (choice === q.correct) {
         playSound("sound-correct");
-        current++;
-        showQuestion();
       } else {
         playSound("sound-wrong");
-        lives--;
-        updateHearts();
-        if (lives === 0) {
-          playSound("sound-lost"); // >>> ZVUK PROHRY
-          document.getElementById("quiz").style.display = "none";
-          document.getElementById("result").textContent = "Nemáš žádná srdíčka. Hra končí.";
-        } else {
-          current++;
-          showQuestion();
-        }
       }
+
+      quizDiv.classList.add("fade-out");
+
+      setTimeout(() => {
+        quizDiv.classList.remove("fade-out");
+
+        if (choice === q.correct) {
+          current++;
+        } else {
+          lives--;
+          updateHearts();
+          if (lives === 0) {
+            playSound("sound-lost");
+            quizDiv.style.display = "none";
+            document.getElementById("result").textContent = "Nemáš žádná srdíčka. Hra končí.";
+            return;
+          } else {
+            current++;
+          }
+        }
+
+        showQuestion();
+      }, 800);
     }
 
     function useFiftyFifty() {
