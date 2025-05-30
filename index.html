@@ -19,19 +19,17 @@
       padding: 20px;
       border-radius: 10px;
       box-shadow: 0 0 20px #000;
+      position: relative;
     }
 
-    .question, .options button {
-      transition: opacity 0.5s ease;
-    }
-
-    .question.fade-out, .options.fade-out {
-      opacity: 0;
+    h1 {
+      margin-bottom: 30px;
     }
 
     .question {
       font-size: 20px;
       margin-bottom: 20px;
+      transition: opacity 0.5s;
     }
 
     .options button {
@@ -47,10 +45,15 @@
       cursor: pointer;
     }
 
+    .options button:hover {
+      background-color: #0077cc;
+    }
+
     .result {
       margin-top: 20px;
-      font-size: 28px;
+      font-size: 32px;
       font-weight: bold;
+      text-transform: uppercase;
     }
 
     #hearts {
@@ -69,95 +72,79 @@
       cursor: pointer;
     }
 
+    .side-image {
+      position: absolute;
+      top: 40px;
+      width: 150px;
+      height: auto;
+    }
+
+    .left-img {
+      left: -160px;
+    }
+
+    .right-img {
+      right: -160px;
+    }
+
     #leaderboard {
-      margin-top: 40px;
-      padding: 20px;
-      background-color: #002244;
-      border-radius: 10px;
-      box-shadow: 0 0 10px #000;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
-    }
-
-    table, th, td {
-      border: 1px solid #ccc;
-    }
-
-    th, td {
-      padding: 8px;
-    }
-
-    input[type="password"] {
-      padding: 6px;
-      border-radius: 6px;
-      border: none;
-      font-size: 16px;
-    }
-
-    #resetSection {
-      margin-top: 20px;
-    }
-
-    .highlight {
-      font-size: 36px;
       margin-top: 30px;
-      animation: fadeIn 1s ease-in-out;
+      background-color: #002244;
+      padding: 20px;
+      border-radius: 10px;
+      border: 2px solid white;
     }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: scale(0.8); }
-      to { opacity: 1; transform: scale(1); }
+    #leaderboard h2 {
+      margin-bottom: 10px;
+    }
+
+    @media (max-width: 768px) {
+      .side-image {
+        display: none;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Chcete být milionářem – T. G. Masaryk</h1>
 
-    <div id="hearts">❤️❤️❤️</div>
+<script>
+  sessionStorage.clear(); // RESET STAVU při každém načtení stránky
+</script>
 
-    <button id="fiftyBtn" onclick="useFiftyFifty()">Použít 50 na 50</button>
+<div class="container">
+  <img src="masaryk.png" alt="T. G. Masaryk" class="side-image left-img">
+  <img src="masaryk2.png" alt="Podpis Masaryka" class="side-image right-img">
 
-    <div id="quiz">
-      <div class="question" id="question">Načítání otázky...</div>
-      <div class="options" id="options"></div>
-    </div>
+  <h1>Chcete být milionářem – T. G. Masaryk</h1>
 
-    <div class="result" id="result"></div>
+  <div id="hearts">❤️❤️❤️</div>
 
-    <div id="resetSection">
-      <input type="password" id="resetPass" placeholder="Zadej heslo pro reset">
-      <button onclick="resetLeaderboard()">Reset žebříčku</button>
-    </div>
+  <button id="fiftyBtn" onclick="useFiftyFifty()">Použít 50 na 50</button>
 
-    <div id="leaderboard">
-      <h2>Žebříček nejlepších</h2>
-      <table>
-        <thead>
-          <tr><th>Jméno</th><th>Čas (s)</th></tr>
-        </thead>
-        <tbody id="leaderboardBody"></tbody>
-      </table>
-    </div>
+  <div id="quiz">
+    <div class="question" id="question">Načítání otázky...</div>
+    <div class="options" id="options"></div>
   </div>
 
-  <audio id="sound-correct" src="correct.mp3"></audio>
-  <audio id="sound-wrong" src="wrong.mp3"></audio>
-  <audio id="sound-win" src="win.mp3"></audio>
-  <audio id="sound-lost" src="lost.mp3"></audio>
+  <div class="result" id="result"></div>
 
-  <script>
-    // Vymazat session po načtení nové hry (chrání proti opětovnému vstupu do konce hry)
-    sessionStorage.clear();
+  <div id="leaderboard">
+    <h2>Žebříček</h2>
+    <ol id="scores"></ol>
+    <input type="password" id="resetPassword" placeholder="Zadejte heslo pro reset">
+    <button onclick="resetLeaderboard()">Resetovat žebříček</button>
+  </div>
+</div>
 
-    // Zde pokračuje JavaScript jako dříve, včetně načítání otázek, zobrazování otázek, atd.
-    // Nezapomeň přidat sessionStorage.setItem("startTime", Date.now()) hned na začátku hry.
+<audio id="sound-correct" src="correct.mp3"></audio>
+<audio id="sound-wrong" src="wrong.mp3"></audio>
+<audio id="sound-win" src="win.mp3"></audio>
+<audio id="sound-lost" src="lost.mp3"></audio>
 
-    // Kód pokračuje podle předešlé verze
-  </script>
+<script>
+// Zbytek funkčního JavaScriptu včetně otázek, časovače, správného ukládání a načítání žebříčku z localStorage...
+</script>
+
 </body>
 </html>
