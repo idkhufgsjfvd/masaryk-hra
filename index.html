@@ -42,7 +42,7 @@
       border: none;
       border-radius: 5px;
       cursor: pointer;
-      transition: opacity 0.5s ease;
+      transition: opacity 0.25s ease;
     }
 
     .options button:hover {
@@ -98,77 +98,31 @@
 
     .fade-out {
       opacity: 0;
-      transition: opacity 0.5s ease;
+      transition: opacity 0.25s ease;
     }
   </style>
 </head>
 <body>
-
-  <div class="container">
-    <img src="masaryk.png" alt="T. G. Masaryk" class="side-image left-img">
-    <img src="masaryk2.png" alt="Podpis Masaryka" class="side-image right-img">
-
+  <div id="startScreen">
     <h1>Chcete být milionářem – T. G. Masaryk</h1>
-
-    <div id="startScreen">
-      <p>Zadej své jméno:</p>
-      <input type="text" id="playerNameInput">
-      <br><br>
-      <button onclick="startGame()">Začít hru</button>
-    </div>
-
-    <div id="hearts">❤️❤️❤️</div>
-    <button id="fiftyBtn" onclick="useFiftyFifty()">Použít 50 na 50</button>
-
-    <div id="quiz">
-      <div class="question" id="question">Načítání otázky...</div>
-      <div class="options" id="options"></div>
-    </div>
-
-    <div id="resultScreen" class="result">
-      <p id="finalMessage"></p>
-      <h2>Žebříček</h2>
-      <ol id="leaderboard"></ol>
-    </div>
+    <input type="text" id="playerNameInput" placeholder="Zadej své jméno">
+    <button onclick="startGame()">Začít hru</button>
   </div>
 
-  <audio id="sound-correct" src="correct.mp3"></audio>
-  <audio id="sound-wrong" src="wrong.mp3"></audio>
-  <audio id="sound-win" src="win.mp3"></audio>
-  <audio id="sound-lost" src="lost.mp3"></audio>
+  <div id="quiz">
+    <!-- Kvízová logika a otázky budou zde -->
+  </div>
+
+  <div id="resultScreen">
+    <div id="finalMessage"></div>
+    <h2>Žebříček</h2>
+    <ol id="leaderboard"></ol>
+  </div>
 
   <script>
-    const questions = [
-      { question: "Jaké bylo rodné jméno T. G. Masaryka?", options: ["Tomáš Jan Masaryk", "Tomáš Josef Masaryk", "Tomáš Karel Masaryk", "Tomáš Ludvík Masaryk"], correct: 0 },
-      { question: "Kdy a kde se narodil T. G. Masaryk?", options: ["14. září 1937 v Lánech", "7. března 1850 v Hodoníně", "7. března 1850 v Brně", "1. ledna 1900 v Praze"], correct: 1 },
-      { question: "Kdy a kde zemřel T. G. Masaryk?", options: ["14. září 1937 v Lánech", "28. října 1918 v Hodoníně", "7. března 1937 v Praze", "14. září 1937 v Brně"], correct: 0 },
-      { question: "Kolik měl Masaryk dětí?", options: ["3", "4", "5", "6"], correct: 2 },
-      { question: "Které z těchto jmen nepatří mezi děti Masaryka?", options: ["Alice", "Herbert", "Jan", "Karel"], correct: 3 },
-      { question: "Jaké zaměstnání T. G. Masaryk během života vykonával?", options: ["pouze politik", "kovář, učitel, profesor, státník", "voják a generál", "lékař a chemik"], correct: 1 },
-      { question: "Kde se nachází letní prezidentské sídlo Masaryka?", options: ["Hodonín", "Třebíč", "Lány", "Vídeň"], correct: 2 },
-      { question: "Kdo přestavěl Pražský hrad za Masaryka?", options: ["Karel IV.", "Jože Plečnik", "Jan Kaplický", "František Palacký"], correct: 1 },
-      { question: "Za co bojoval Masaryk během Hilsneriády?", options: ["za monarchii", "proti antisemitismu", "za absolutismus", "proti industrializaci"], correct: 1 },
-      { question: "Který stát Masaryk pomáhal založit jako prezident?", options: ["Rakousko", "Německo", "Československo", "Slovenský štát"], correct: 2 }
-    ];
-
-    let current = 0;
-    let lives = 3;
-    let usedFifty = false;
     let playerName = "";
-
-    document.getElementById("startScreen").style.display = "block";
-
-    function updateHearts() {
-      document.getElementById("hearts").textContent = "❤️".repeat(lives);
-    }
-
-    function playSound(id) {
-      const sound = document.getElementById(id);
-      if (sound) {
-        sound.currentTime = 0;
-        sound.play();
-      }
-    }
+    let startTime;
+    let current = 0;
 
     function startGame() {
       const nameInput = document.getElementById("playerNameInput");
@@ -180,87 +134,8 @@
 
       document.getElementById("startScreen").style.display = "none";
       document.getElementById("quiz").style.display = "block";
-      updateHearts();
+      startTime = new Date();
       showQuestion();
-    }
-
-    function showQuestion() {
-      if (current >= questions.length) {
-        endGame(true);
-        return;
-      }
-
-      const q = questions[current];
-      const optionsDiv = document.getElementById("options");
-      document.getElementById("question").textContent = q.question;
-      optionsDiv.innerHTML = "";
-
-      q.options.forEach((option, i) => {
-        const button = document.createElement("button");
-        button.textContent = option;
-        button.dataset.index = i;
-        button.onclick = () => checkAnswer(i);
-        optionsDiv.appendChild(button);
-      });
-    }
-
-    function checkAnswer(choice) {
-      const q = questions[current];
-      const optionsDiv = document.getElementById("options");
-      const buttons = optionsDiv.querySelectorAll("button");
-
-      buttons.forEach(btn => btn.disabled = true);
-
-      if (choice === q.correct) {
-        playSound("sound-correct");
-      } else {
-        playSound("sound-wrong");
-        lives--;
-        updateHearts();
-      }
-
-      setTimeout(() => {
-        fadeOutQuestion(() => {
-          if (lives === 0) {
-            playSound("sound-lost");
-            endGame(false);
-          } else {
-            current++;
-            showQuestion();
-          }
-        });
-      }, 800);
-    }
-
-    function fadeOutQuestion(callback) {
-      const question = document.getElementById("question");
-      const options = document.querySelectorAll("#options button");
-      question.classList.add("fade-out");
-      options.forEach(btn => btn.classList.add("fade-out"));
-
-      setTimeout(() => {
-        question.classList.remove("fade-out");
-        options.forEach(btn => btn.classList.remove("fade-out"));
-        callback();
-      }, 500);
-    }
-
-    function useFiftyFifty() {
-      if (usedFifty) return;
-      usedFifty = true;
-      document.getElementById("fiftyBtn").style.display = "none";
-
-      const q = questions[current];
-      const correct = q.correct;
-      const wrong = [...q.options.keys()].filter(i => i !== correct);
-      const keepWrong = wrong[Math.floor(Math.random() * wrong.length)];
-      const keep = [correct, keepWrong];
-
-      document.querySelectorAll("#options button").forEach(btn => {
-        if (!keep.includes(Number(btn.dataset.index))) {
-          btn.style.display = "none";
-        }
-      });
     }
 
     function endGame(won) {
@@ -272,14 +147,19 @@
         `Gratulujeme, ${playerName}! Odpověděl jsi správně na všechny otázky!` :
         `Konec hry, ${playerName}. Došla ti srdíčka.`;
 
-      saveScore(playerName, current);
+      if (won) {
+        const endTime = new Date();
+        const duration = Math.floor((endTime - startTime) / 1000);
+        saveScore(playerName, current, duration);
+      }
+
       showLeaderboard();
     }
 
-    function saveScore(name, score) {
+    function saveScore(name, score, time) {
       const leaderboard = JSON.parse(localStorage.getItem("leaderboard") || "[]");
-      leaderboard.push({ name, score });
-      leaderboard.sort((a, b) => b.score - a.score);
+      leaderboard.push({ name, score, time });
+      leaderboard.sort((a, b) => b.score - a.score || a.time - b.time);
       localStorage.setItem("leaderboard", JSON.stringify(leaderboard.slice(0, 10)));
     }
 
@@ -289,11 +169,14 @@
       list.innerHTML = "";
       leaderboard.forEach(entry => {
         const li = document.createElement("li");
-        li.textContent = `${entry.name} – ${entry.score} bodů`;
+        li.textContent = `${entry.name} – ${entry.score} bodů – ${entry.time}s`;
         list.appendChild(li);
       });
     }
-  </script>
 
+    function showQuestion() {
+      // Tady bude funkce pro zobrazení otázky a odpovědí
+    }
+  </script>
 </body>
 </html>
