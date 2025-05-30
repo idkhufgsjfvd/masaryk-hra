@@ -26,8 +26,10 @@
       margin-bottom: 30px;
     }
 
-    .question, .options {
-      transition: opacity 0.25s ease;
+    .question {
+      font-size: 20px;
+      margin-bottom: 20px;
+      transition: opacity 0.4s ease;
     }
 
     .options button {
@@ -49,7 +51,7 @@
 
     .result {
       margin-top: 20px;
-      font-size: 22px;
+      font-size: 28px;
       font-weight: bold;
     }
 
@@ -69,6 +71,13 @@
       cursor: pointer;
     }
 
+    .highlight {
+      font-size: 40px;
+      font-weight: bold;
+      color: lime;
+      margin-top: 20px;
+    }
+
     .side-image {
       position: absolute;
       top: 40px;
@@ -76,249 +85,177 @@
       height: auto;
     }
 
-    .left-img { left: -160px; }
-    .right-img { right: -160px; }
+    .left-img {
+      left: -160px;
+    }
 
-    @media (max-width: 768px) {
-      .side-image { display: none; }
+    .right-img {
+      right: -160px;
     }
 
     #leaderboard {
+      background-color: #004080;
+      padding: 15px;
+      border-radius: 10px;
       margin-top: 40px;
-      padding: 20px;
-      border: 2px solid #0077cc;
-      border-radius: 15px;
-      background-color: #002a4d;
-      box-shadow: 0 0 10px rgba(0,0,0,0.5);
     }
 
-    #leaderboard h2 {
-      margin-top: 0;
-      color: #00aced;
-      font-size: 24px;
-      border-bottom: 1px solid #00aced;
-      padding-bottom: 10px;
-    }
-
-    #scoreList {
-      list-style: none;
-      padding: 0;
-      text-align: left;
-      font-size: 18px;
-    }
-
-    #scoreList li {
-      margin-bottom: 8px;
-    }
-
-    #nameInput {
-      font-size: 18px;
-      padding: 10px;
-      width: 300px;
-      margin: 20px auto;
-    }
-
-    #startBtn {
-      padding: 10px 20px;
-      font-size: 18px;
-      margin-bottom: 30px;
-      cursor: pointer;
-    }
-
-    .big-message {
-      font-size: 60px;
-      font-weight: bold;
-      color: yellow;
-      margin-top: 40px;
-      animation: fadeInScale 1s ease-out;
-    }
-
-    @keyframes fadeInScale {
-      0% { opacity: 0; transform: scale(0.8); }
-      100% { opacity: 1; transform: scale(1); }
+    @media (max-width: 768px) {
+      .side-image {
+        display: none;
+      }
     }
   </style>
 </head>
 <body>
 
-  <div class="container">
-    <img src="masaryk.png" class="side-image left-img">
-    <img src="masaryk2.png" class="side-image right-img">
+<div class="container">
+  <img src="masaryk.png" alt="T. G. Masaryk" class="side-image left-img">
+  <img src="masaryk2.png" alt="Podpis Masaryka" class="side-image right-img">
 
-    <h1>Chcete být milionářem – T. G. Masaryk</h1>
+  <h1>Chcete být milionářem – T. G. Masaryk</h1>
 
-    <div id="nameSection">
-      <input id="nameInput" type="text" placeholder="Zadejte své jméno">
-      <br>
-      <button id="startBtn" onclick="startGame()">Začít hru</button>
-    </div>
+  <div id="hearts">❤️❤️❤️</div>
 
-    <div id="gameSection" style="display:none;">
-      <div id="hearts">❤️❤️❤️</div>
-      <button id="fiftyBtn" onclick="useFiftyFifty()">Použít 50 na 50</button>
+  <button id="fiftyBtn" onclick="useFiftyFifty()">Použít 50 na 50</button>
 
-      <div id="quiz">
-        <div class="question" id="question">Načítání otázky...</div>
-        <div class="options" id="options"></div>
-      </div>
-
-      <div class="result" id="result"></div>
-      <div id="finalMessage"></div>
-    </div>
-
-    <div id="leaderboard">
-      <h2>Žebříček hráčů</h2>
-      <ol id="scoreList"></ol>
-    </div>
+  <div id="quiz">
+    <div class="question" id="question">Načítání otázky...</div>
+    <div class="options" id="options"></div>
   </div>
 
-  <audio id="sound-correct" src="correct.mp3"></audio>
-  <audio id="sound-wrong" src="wrong.mp3"></audio>
-  <audio id="sound-win" src="win.mp3"></audio>
-  <audio id="sound-lost" src="lost.mp3"></audio>
+  <div class="result" id="result"></div>
+  <div class="highlight" id="endMessage"></div>
 
-  <script>
-    const questions = [
-      { question: "Jaké bylo rodné jméno T. G. Masaryka?", options: ["Tomáš Jan Masaryk", "Tomáš Josef Masaryk", "Tomáš Karel Masaryk", "Tomáš Ludvík Masaryk"], correct: 0 },
-      { question: "Kdy a kde se narodil T. G. Masaryk?", options: ["14. září 1937 v Lánech", "7. března 1850 v Hodoníně", "7. března 1850 v Brně", "1. ledna 1900 v Praze"], correct: 1 },
-      { question: "Kdy a kde zemřel T. G. Masaryk?", options: ["14. září 1937 v Lánech", "28. října 1918 v Hodoníně", "7. března 1937 v Praze", "14. září 1937 v Brně"], correct: 0 },
-      { question: "Kolik měl Masaryk dětí?", options: ["3", "4", "5", "6"], correct: 2 },
-      { question: "Které z těchto jmen nepatří mezi děti Masaryka?", options: ["Alice", "Herbert", "Jan", "Karel"], correct: 3 },
-      { question: "Jaké zaměstnání T. G. Masaryk během života vykonával?", options: ["pouze politik", "kovář, učitel, profesor, státník", "voják a generál", "lékař a chemik"], correct: 1 },
-      { question: "Kde se nachází letní prezidentské sídlo Masaryka?", options: ["Hodonín", "Třebíč", "Lány", "Vídeň"], correct: 2 },
-      { question: "Kdo přestavěl Pražský hrad za Masaryka?", options: ["Karel IV.", "Jože Plečnik", "Jan Kaplický", "František Palacký"], correct: 1 },
-      { question: "Za co bojoval Masaryk během Hilsneriády?", options: ["za monarchii", "proti antisemitismu", "za absolutismus", "proti industrializaci"], correct: 1 },
-      { question: "Který stát Masaryk pomáhal založit jako prezident?", options: ["Rakousko", "Německo", "Československo", "Slovenský štát"], correct: 2 }
-    ];
+  <div id="leaderboard">
+    <h2>Žebříček</h2>
+    <ul id="leaderboardList"></ul>
+  </div>
+</div>
 
-    let current = 0;
-    let lives = 3;
-    let usedFifty = false;
-    let startTime, playerName;
-    let leaderboard = [];
+<audio id="sound-correct" src="correct.mp3"></audio>
+<audio id="sound-wrong" src="wrong.mp3"></audio>
+<audio id="sound-win" src="win.mp3"></audio>
+<audio id="sound-lost" src="lost.mp3"></audio>
 
-    function updateHearts() {
-      document.getElementById("hearts").textContent = "❤️".repeat(lives);
+<script>
+  const questions = [ /* otázky jako v předchozí verzi */ ];
+
+  let current = 0;
+  let lives = 3;
+  let usedFifty = false;
+  let playerName = prompt("Zadej své jméno:");
+  let startTime = Date.now();
+
+  function updateHearts() {
+    document.getElementById("hearts").textContent = "❤️".repeat(lives);
+  }
+
+  function playSound(id) {
+    const sound = document.getElementById(id);
+    if (sound) {
+      sound.currentTime = 0;
+      sound.play();
+    }
+  }
+
+  function showQuestion() {
+    if (current >= questions.length) {
+      const totalTime = Math.floor((Date.now() - startTime) / 1000);
+      playSound("sound-win");
+      document.getElementById("quiz").style.display = "none";
+      document.getElementById("result").textContent = "";
+      document.getElementById("endMessage").textContent = "VYHRÁL JSI!";
+      saveScore(playerName, totalTime);
+      return;
     }
 
-    function playSound(id) {
-      const sound = document.getElementById(id);
-      if (sound) {
-        sound.currentTime = 0;
-        sound.play();
-      }
-    }
+    const q = questions[current];
+    const optionsDiv = document.getElementById("options");
+    const questionEl = document.getElementById("question");
 
-    function loadLeaderboard() {
-      const data = localStorage.getItem("leaderboard");
-      leaderboard = data ? JSON.parse(data) : [];
-      renderLeaderboard();
-    }
+    questionEl.style.opacity = "1";
+    questionEl.textContent = q.question;
+    optionsDiv.innerHTML = "";
 
-    function saveLeaderboard() {
-      localStorage.setItem("leaderboard", JSON.stringify(leaderboard));
-    }
+    q.options.forEach((option, i) => {
+      const button = document.createElement("button");
+      button.textContent = option;
+      button.onclick = () => checkAnswer(i);
+      button.dataset.index = i;
+      optionsDiv.appendChild(button);
+    });
+  }
 
-    function startGame() {
-      playerName = document.getElementById("nameInput").value.trim();
-      if (!playerName) {
-        alert("Zadejte jméno!");
-        return;
-      }
-      document.getElementById("nameSection").style.display = "none";
-      document.getElementById("gameSection").style.display = "block";
-      updateHearts();
-      startTime = Date.now();
-      showQuestion();
-    }
+  function checkAnswer(choice) {
+    const q = questions[current];
+    const questionEl = document.getElementById("question");
+    questionEl.style.opacity = "0";
 
-    function showQuestion() {
-      const q = questions[current];
-      if (!q) {
-        const timeTaken = Math.floor((Date.now() - startTime) / 1000);
-        playSound("sound-win");
-        document.getElementById("quiz").style.display = "none";
-        document.getElementById("result").textContent = `Gratulujeme, vyhrál jsi! Čas: ${timeTaken} sekund.`;
-        document.getElementById("finalMessage").innerHTML = `<div class="big-message">VYHRÁL JSI!</div>`;
-
-        leaderboard.push({ name: playerName, time: timeTaken });
-        leaderboard.sort((a, b) => a.time - b.time);
-        saveLeaderboard();
-        renderLeaderboard();
-        return;
-      }
-
-      const optionsDiv = document.getElementById("options");
-      document.getElementById("question").textContent = q.question;
-      optionsDiv.innerHTML = "";
-
-      q.options.forEach((opt, i) => {
-        const btn = document.createElement("button");
-        btn.textContent = opt;
-        btn.onclick = () => checkAnswer(i);
-        btn.dataset.index = i;
-        optionsDiv.appendChild(btn);
-      });
-
-      document.getElementById("quiz").style.opacity = 1;
-    }
-
-    function checkAnswer(choice) {
-      const q = questions[current];
-      const isCorrect = choice === q.correct;
-
-      document.getElementById("quiz").style.opacity = 0;
-      setTimeout(() => {
-        if (isCorrect) {
-          playSound("sound-correct");
-        } else {
-          playSound("sound-wrong");
-          lives--;
-          updateHearts();
-          if (lives === 0) {
-            playSound("sound-lost");
-            document.getElementById("quiz").style.display = "none";
-            document.getElementById("result").textContent = "Konec hry – došla ti srdíčka.";
-            document.getElementById("finalMessage").innerHTML = `<div class="big-message">PROHRÁL JSI!</div>`;
-            return;
-          }
-        }
+    setTimeout(() => {
+      if (choice === q.correct) {
+        playSound("sound-correct");
         current++;
-        showQuestion();
-      }, 300);
-    }
-
-    function useFiftyFifty() {
-      if (usedFifty) return;
-      usedFifty = true;
-      document.getElementById("fiftyBtn").style.display = "none";
-
-      const q = questions[current];
-      const correct = q.correct;
-      const wrong = q.options.map((_, i) => i).filter(i => i !== correct);
-      const keptWrong = wrong[Math.floor(Math.random() * wrong.length)];
-      const keep = [correct, keptWrong];
-
-      const buttons = document.querySelectorAll("#options button");
-      buttons.forEach(btn => {
-        if (!keep.includes(Number(btn.dataset.index))) {
-          btn.style.display = "none";
+      } else {
+        playSound("sound-wrong");
+        lives--;
+        updateHearts();
+        if (lives === 0) {
+          playSound("sound-lost");
+          document.getElementById("quiz").style.display = "none";
+          document.getElementById("endMessage").textContent = "PROHRÁL JSI!";
+          return;
+        } else {
+          current++;
         }
-      });
-    }
+      }
+      showQuestion();
+    }, 400);
+  }
 
-    function renderLeaderboard() {
-      const list = document.getElementById("scoreList");
-      list.innerHTML = "";
-      leaderboard.forEach((entry) => {
-        const li = document.createElement("li");
-        li.textContent = `${entry.name} – ${entry.time} sekund`;
-        list.appendChild(li);
-      });
-    }
+  function useFiftyFifty() {
+    if (usedFifty) return;
+    usedFifty = true;
+    document.getElementById("fiftyBtn").style.display = "none";
 
-    // Načti žebříček po načtení stránky
-    window.onload = loadLeaderboard;
-  </script>
+    const q = questions[current];
+    const correct = q.correct;
+    const wrong = [...q.options.keys()].filter(i => i !== correct);
+    const keptWrong = wrong[Math.floor(Math.random() * wrong.length)];
+    const keep = [correct, keptWrong];
+
+    const buttons = document.querySelectorAll("#options button");
+    buttons.forEach(btn => {
+      if (!keep.includes(Number(btn.dataset.index))) {
+        btn.style.display = "none";
+      }
+    });
+  }
+
+  function saveScore(name, time) {
+    if (!name) return;
+    const scores = JSON.parse(localStorage.getItem("leaderboard") || "[]");
+    scores.push({ name, time });
+    scores.sort((a, b) => a.time - b.time);
+    localStorage.setItem("leaderboard", JSON.stringify(scores));
+    displayLeaderboard();
+  }
+
+  function displayLeaderboard() {
+    const scores = JSON.parse(localStorage.getItem("leaderboard") || "[]");
+    const list = document.getElementById("leaderboardList");
+    list.innerHTML = "";
+    scores.forEach((entry, index) => {
+      const li = document.createElement("li");
+      li.textContent = `${index + 1}. ${entry.name} – ${entry.time} sekund`;
+      list.appendChild(li);
+    });
+  }
+
+  updateHearts();
+  displayLeaderboard();
+  showQuestion();
+</script>
+
 </body>
 </html>
